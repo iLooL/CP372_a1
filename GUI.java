@@ -1,5 +1,5 @@
+package board;
 import java.awt.event.ActionEvent;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 /*
@@ -7,6 +7,7 @@ import javax.swing.Action;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 
 public class GUI extends javax.swing.JFrame {
 
@@ -84,7 +85,7 @@ public class GUI extends javax.swing.JFrame {
 		connectButton.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jButton1ActionPerformed(evt);
+				connectButtonAction(evt);
 			}
 		});
 
@@ -105,7 +106,7 @@ public class GUI extends javax.swing.JFrame {
 		pinYCoordinate.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jTextField4ActionPerformed(evt);
+				pinYCoordinateAction(evt);
 			}
 		});
 
@@ -134,7 +135,7 @@ public class GUI extends javax.swing.JFrame {
 		postYCoordinate.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jTextField5ActionPerformed(evt);
+				postYCoordinateAction(evt);
 			}
 		});
 
@@ -411,15 +412,15 @@ public class GUI extends javax.swing.JFrame {
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
 
-	private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jTextField4ActionPerformed
+	private void pinYCoordinateAction(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jTextField4ActionPerformed
 		// TODO add your handling code here:
 	}// GEN-LAST:event_jTextField4ActionPerformed
 
-	private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButton1ActionPerformed
+	private void connectButtonAction(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButton1ActionPerformed
 		// TODO add your handling code here:
 	}// GEN-LAST:event_jButton1ActionPerformed
 
-	private void jTextField5ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jTextField5ActionPerformed
+	private void postYCoordinateAction(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jTextField5ActionPerformed
 		// TODO add your handling code here:
 	}// GEN-LAST:event_jTextField5ActionPerformed
 
