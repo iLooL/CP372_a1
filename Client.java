@@ -476,12 +476,16 @@ public class Client extends javax.swing.JFrame {
 
 	private void connectButtonAction(java.awt.event.ActionEvent evt)
 			throws NumberFormatException, UnknownHostException, IOException {// GEN-FIRST:event_jButton1ActionPerformed
-		String serverAddress = ipAddress.getText();
-		String port = portNumber.getText();
-		socket = new Socket(serverAddress, Integer.parseInt(port));
-		isConnected = socket.isConnected();
-		if (isConnected) {
-			output.setText("You are connected to the server.");
+		if (socket == null) {
+			String serverAddress = ipAddress.getText();
+			String port = portNumber.getText();
+			socket = new Socket(serverAddress, Integer.parseInt(port));
+			isConnected = socket.isConnected();
+			if (isConnected) {
+				output.setText("You are connected to the server.");
+			}
+		} else {
+			output.setText("You have already connected to the \nserver.");
 		}
 	}// GEN-LAST:event_jButton1ActionPerformed
 
