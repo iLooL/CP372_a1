@@ -15,6 +15,7 @@ import javax.swing.Action;
 public class Client extends javax.swing.JFrame {
 
 	public boolean isConnected = false;
+	public Socket socket;
 
 	/**
 	 * Creates new form GUI
@@ -63,7 +64,16 @@ public class Client extends javax.swing.JFrame {
 		disconnectButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				try {
+					socket.close();
+					output.setText("Disconnected successfully");
+				} catch (IOException e1) {
+					output.setText("Disconnect failed.");
+				} catch (NullPointerException e2) {
+					output.setText("You are currently not connected.");
+				}
 			}
+
 		});
 		unpinButton = new javax.swing.JButton();
 		unpinButton.addActionListener(new ActionListener() {
@@ -468,7 +478,7 @@ public class Client extends javax.swing.JFrame {
 			throws NumberFormatException, UnknownHostException, IOException {// GEN-FIRST:event_jButton1ActionPerformed
 		String serverAddress = ipAddress.getText();
 		String port = portNumber.getText();
-		Socket socket = new Socket(serverAddress, Integer.parseInt(port));
+		socket = new Socket(serverAddress, Integer.parseInt(port));
 		isConnected = socket.isConnected();
 		if (isConnected) {
 			output.setText("You are connected to the server.");
