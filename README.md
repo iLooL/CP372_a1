@@ -12,3 +12,7 @@ ERRORS
 -must restart program to connect after disconnected
 
 -colours in get section is text field but should be drop down menu 
+
+TODO
+
+-fix the PDF by adding test cases (ask the prof for details)
