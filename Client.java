@@ -1,8 +1,13 @@
-package cp372_a1;
+package board;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -10,10 +15,9 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 public class Client extends javax.swing.JFrame {
-
+	private static final long serialVersionUID = 1L;
 	public boolean isConnected = false;
 	public Socket socket;
-
 	public Client() {
 		initComponents();
 	}
@@ -45,6 +49,17 @@ public class Client extends javax.swing.JFrame {
 		pinButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("pin button pressed");
+				if(pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
+					output.setText("Please enter an integer in both text fields.");
+				}
+				else if(!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
+					output.setText("Please enter an integer in both text fields.");
+				}
+				else {
+					System.out.println("integer");
+				}
+				
 			}
 		});
 		disconnectButton = new javax.swing.JButton();
@@ -458,7 +473,7 @@ public class Client extends javax.swing.JFrame {
 	}
 
 	private void pinYCoordinateAction(java.awt.event.ActionEvent evt) {
-
+		
 	}
 
 	private void connectButtonAction(java.awt.event.ActionEvent evt)
@@ -477,9 +492,12 @@ public class Client extends javax.swing.JFrame {
 	}
 
 	private void postYCoordinateAction(java.awt.event.ActionEvent evt) {
+		// TODO add your handling code here:
+	}// GEN-LAST:event_jTextField5ActionPerformed
 
-	}
-
+	/**
+	 * @param args the command line arguments
+	 */
 	public static void main(String args[]) {
 		try {
 			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -505,8 +523,17 @@ public class Client extends javax.swing.JFrame {
 			}
 		});
 	}
+	
+	public boolean isInteger(String num) { 
+	    try {
+	        Integer.parseInt(num);
+	        return true; 
+	    }
+	    catch(Exception e) { 
+	        return false;
+	    }
+	} 
 
-	// Variables declaration
 	private javax.swing.JButton connectButton;
 	private javax.swing.JButton pinButton;
 	private javax.swing.JButton postButton;
@@ -554,6 +581,7 @@ public class Client extends javax.swing.JFrame {
 	private javax.swing.JTextField getColour;
 	private final Action action = new SwingAction();
 
+	// End of variables declaration//GEN-END:variables
 	private class SwingAction extends AbstractAction {
 		public SwingAction() {
 			putValue(NAME, "SwingAction");
