@@ -477,12 +477,9 @@ public class Client extends javax.swing.JFrame {
 	}
 
 	private void postYCoordinateAction(java.awt.event.ActionEvent evt) {
-		// TODO add your handling code here:
+
 	}
 
-	/**
-	 * @param args the command line arguments
-	 */
 	public static void main(String args[]) {
 		try {
 			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
