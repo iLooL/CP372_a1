@@ -5,11 +5,6 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -578,7 +573,6 @@ public class Client extends javax.swing.JFrame {
 	private javax.swing.JTextField getColour;
 	private final Action action = new SwingAction();
 
-	// End of variables declaration//GEN-END:variables
 	private class SwingAction extends AbstractAction {
 		public SwingAction() {
 			putValue(NAME, "SwingAction");
