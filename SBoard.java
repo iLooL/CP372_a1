@@ -1,5 +1,4 @@
-package cp372_a1;
-
+package board;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,116 +7,252 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class SBoard {
+public class SBoard {	
+	
+	public static int width;
+	public static int height;
+	public static String[] colours;
+	public static Board board;
+	
+	// args starts reading from index 0 meaning the port number is the first argument
+    public static void main(String[] args) throws Exception {
+    	
+    	// assign port number
+    	int portNumber = Integer.parseInt(args[0]);
+    	//assign dimensions
+    	width = Integer.parseInt(args[1]);
+    	height = Integer.parseInt(args[2]);
+    	int colourLen = args.length - 3;
+    	colours = new String[colourLen]; 
+    	// create colour array
+    	for(int i = 0; i < colourLen; i++) {
+    		colours[i] = args[i + 3];
+    	}
+        System.out.println("The board server is running.");
+        ServerSocket listener = new ServerSocket(portNumber);
 
-	// args starts reading from index 0 meaning the port number is the first
-	// argument
-	public static void main(String[] args) throws Exception {
-
-		// assign port number
-		int portNumber = Integer.parseInt(args[0]);
-		// assign dimensions
-		int width = Integer.parseInt(args[1]);
-		int height = Integer.parseInt(args[2]);
-		int colourLen = args.length - 3;
-		String[] colours = new String[colourLen];
-		// create colour array
-		for (int i = 0; i < colourLen; i++) {
-			colours[i] = args[i + 3];
-		}
-
-		System.out.println("The board server is running.");
-		int clientNumber = 0;
-		ServerSocket listener = new ServerSocket(portNumber);
-
-		try {
-			while (true) {
-				new Board(listener.accept(), width, height, colours, clientNumber++).start();
-			}
-		} finally {
-			listener.close();
-		}
-	}
-
-	public class Pin {
-		private int x;
-		private int y;
-
-		public Pin(int x, int y) {
+        board = new Board(width, height, colours);
+        
+        try {
+            while (true) {
+                new Boards(listener.accept()).start();
+            }
+        } finally {
+            listener.close();
+        }
+    }
+    
+    public static class Pin{
+		public int x;
+		public int y;
+		
+		public Pin(int x,int y) {
 			this.x = x;
-			this.y = x;
+			this.y = y;
 		}
 	}
+    
+    public class Note{
+    	public String content;
+    	public boolean isPinned;
+    	public String colour;
+    	public ArrayList<Pin> points = new ArrayList<Pin>();
+    	public Pin point;
+    	public int width;
+    	public int height;
+    	
+    	public void note(String content, String colour, int x, int y, int width, int height) {
+    		this.content = content;
+    		this.isPinned = false;
+    		this.colour = colour;
+    		this.point = new Pin(x,y);
+    		this.width = width;
+    		this.height = height;
+    	}
+    	
+    	public void setPinned(Note n) {
+    		n.isPinned = true;
+    	}
+    }
+    
+    public static class Board{
+        private int width;
+        private int height;
+        private String[] colours;
+        public ArrayList<Pin> pins = new ArrayList<Pin>();
+        public ArrayList<Note> notes = new ArrayList<Note>();
 
-	public class Note {
-		public String content;
-		public boolean isPinned;
-		public String colour;
-		public ArrayList<Pin> points;
-		public Pin point;
-		public int width;
-		public int height;
-
-		public void note(String content, String colour, int x, int y, int width, int height) {
-			this.content = content;
-			this.isPinned = false;
-			this.colour = colour;
-			this.point = new Pin(x, y);
-			this.width = width;
-			this.height = height;
-		}
-	}
-
-	private static class Board extends Thread {
-		private Socket socket;
-		private int width;
-		private int height;
-		private String[] colours;
-		private ArrayList<Pin> pins;
-		private ArrayList<Note> notes;
-		private int clientNumber;
-
-		public Board(Socket socket, int width, int height, String[] colours, int clientNumber) {
-			this.socket = socket;
-			this.width = width;
-			this.height = height;
-			this.colours = colours.clone(); // clones one array into another
-			this.pins = new ArrayList<Pin>(); // holds all the pins
-			this.notes = new ArrayList<Note>(); // holds all notes
-			this.clientNumber = clientNumber;
-		}
-
-		public String[] getColours() {
-			return this.colours;
-		}
-
-		public int getHeight() {
-			return this.height;
-		}
-
-		public int getWidth() {
-			return this.width;
-		}
-
-		@Override
-		public void run() {
-			try {
-				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-				out.println("Hello, you are client #" + clientNumber + ".");
-				while (true) {
-					String input = in.readLine();
+        public Board(int width, int height, String[] colours) {
+        	this.width = width;
+        	this.height = height;
+        	this.colours = colours.clone();
+        }
+    }
+    
+    private static class Boards extends Thread {
+        private Socket socket;
+        
+        public Boards(Socket socket) {
+            this.socket = socket;
+        }    
+        
+        public void run() {
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                
+                while (true) {
+                	// THE CODE BELOW CURRENTLY DOES NOT SEND BACK TO CLIENT
+                    String input = in.readLine();
+                    System.out.println(input);
+                    String[] parsed = input.split(" ");
+                    
+                    // I think this is all of the button functionality
+                    // double check if it is and delete this comment once you have
+                    // add stuff to the board by: board.[method]
+                    if(parsed[0].equals("pin")) {
+                    	int x = Integer.parseInt(parsed[1]);
+                    	int y = Integer.parseInt(parsed[2]);
+                    	Pin p = new Pin(x, y);
+                    	boolean on = isPinOnBoard(p);
+                    	if(on) {
+                    		board.pins.add(p);
+                        	updateNotes(p, board.notes);
+                        	out.println("Pin " + x +" "+ y + " successful.");
+                    	}
+                    	else {
+                    		// send client error message that requested pin is off the board bounds
+                    		out.println("Pin out of board bounds.");
+                    	}                    	
+                    }
+                    else if(parsed[0].equals("unpin")) {
+                    	int x = Integer.parseInt(parsed[1]);
+                    	int y = Integer.parseInt(parsed[2]);
+                    	Pin p = new Pin(x, y);
+                    	int result = removePin(p, board.pins);
+                    	if(result == 1) {
+                    		updateUnpin(p, board.notes);
+                    		out.println("Removal of pin " + x +" "+ y + " is successful.");
+                    	}
+                    	else {
+                    		out.println("Removal of pin " + x +" "+ y +" is unsuccessful,\n please enter valid input.");
+                    	}
+                    }
+                    else if(parsed[0].equals("post")) {
+                    	
+                    }
+                    else if(parsed[0].equals("getPins")) {
+                    	// use this for debugging
+                    	for(int i = 0; i < board.pins.size(); i++) {
+                    		System.out.println("x: "+ board.pins.get(i).x + " y: " + board.pins.get(i).y);
+                    	}
+                    }
+                    else if(parsed[0].equals("get")) {
+                    	
+                    }
+                    else if(parsed[0].equals("clear")) {
+                    	out.println(clear(board.notes));
+                    }
+                    
+                    
+                }
+            } catch (IOException e) {
+            	// put print error statement
+            } finally {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                	// put print error statement
+                }
+                // put print error statement
+            }
+        }
+        
+        
+        private String clear(ArrayList<Note> notes) {
+			String removed = "";
+			if (notes.size() == 0) {
+				removed = "0";
+			} else {
+				for (int i = 0; i < notes.size(); i++) {
+					if (notes.get(i).isPinned == false) {
+						removed = removed + notes.get(i).content + "@@";
+						board.notes.remove(i);
+					}
 				}
-			} catch (IOException e) {
-
-			} finally {
-				try {
-					socket.close();
-				} catch (IOException e) {
-
+			}
+			return removed;
+		}
+        
+        private void updateNotes(ArrayList<Pin> pins, ArrayList<Note> notes) {
+			int pinSize = pins.size();
+			int noteSize = notes.size();
+			for (int i = 0; i < pinSize; i++) {
+				for (int j = 0; j < noteSize; j++) {
+					// do the math stuff here
 				}
-
 			}
 		}
-	}
+
+		private boolean checkColour(String colour) {
+			boolean result = false;
+			for (int i = 0; i < colours.length; i++) {
+				if (colour.toLowerCase().equals(colours[i].toLowerCase())) {
+					result = true;
+				}
+			}
+			return result;
+		}
+        
+        // returns 1 if it is removed
+        // else 0
+        private int removePin(Pin p, ArrayList<Pin> pins) {
+        	int size = pins.size();
+        	for(int i = 0; i < size; i++) {
+        		if(pins.get(i).x == p.x) {
+        			if(pins.get(i).y == p.y) {
+        				pins.remove(i);
+        				return 1;
+        			}
+        		}
+        	}
+        	return 0;
+        }
+        
+        // updates the notes pin status
+        private void updateUnpin(Pin p, ArrayList<Note> notes) {
+        	for(int i = 0; i < notes.size(); i++) {
+        		if(notes.get(i).points.)
+        	}
+        }
+        
+        // updates notes when a new pin has been added to the board
+        private void updateNotes(Pin pin, ArrayList<Note> notes) {
+        	int noteSize = notes.size();
+        	for(int i = 0; i < noteSize; i++) {
+        		if(notes.get(i).point.x >= pin.x &&
+        		   notes.get(i).point.x + width <= pin.x &&
+        		   notes.get(i).point.y >= pin.y &&
+        		   notes.get(i).point.y + height <= pin.y) {
+        			notes.get(i).isPinned = true;
+        		}
+        	}
+        }
+        
+        // tells us whether the pin is on the board
+        // we must know this before adding the pin to the board object
+        private boolean isPinOnBoard(Pin pin) {
+        	boolean on;
+        	if(pin.x > width || pin.y > height) {
+        		on = false;
+        	}
+        	else {
+        		on = true;
+        	}
+        	return on;
+        }
+        
+    }
 }
+
+
