@@ -193,16 +193,6 @@ public class SBoard {
 			return removed;
 		}
 
-		private void updateNotes(ArrayList<Pin> pins, ArrayList<Note> notes) {
-			int pinSize = pins.size();
-			int noteSize = notes.size();
-			for (int i = 0; i < pinSize; i++) {
-				for (int j = 0; j < noteSize; j++) {
-					// do the math stuff here
-				}
-			}
-		}
-
 		private boolean checkColour(String colour) {
 			boolean result = false;
 			for (int i = 0; i < colours.length; i++) {
