@@ -71,10 +71,11 @@ public class Client extends javax.swing.JFrame {
 						}
 						
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-						String post = "post " + postXCoordinate.getText() + " " + postYCoordinate.getText() + " "
-								+ height.getText() + " " + width.getText() + " " + content
-								+ " " + colour;
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+						String post = "post@@" + postXCoordinate.getText() + "@@" + postYCoordinate.getText() + "@@"
+								+ height.getText() + "@@" + width.getText() + "@@" + content + "@@" + colour;
 						out.println(post);
+						output.setText(in.readLine());
 
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -103,7 +104,7 @@ public class Client extends javax.swing.JFrame {
 					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-						String pin = "pin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						String pin = "pin@@" + pinXCoordinate.getText() + "@@" + pinYCoordinate.getText();
 						out.println(pin);
 						output.setText(in.readLine());
 
@@ -142,7 +143,7 @@ public class Client extends javax.swing.JFrame {
 					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-						String pin = "unpin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						String pin = "unpin@@" + pinXCoordinate.getText() + "@@" + pinYCoordinate.getText();
 						out.println(pin);
 						output.setText(in.readLine());
 
@@ -180,8 +181,10 @@ public class Client extends javax.swing.JFrame {
 				// and it sends back a string of pins
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					String message = "getPins";
 					out.println(message);
+					output.setText(in.readLine());
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -199,25 +202,27 @@ public class Client extends javax.swing.JFrame {
 		getInfoButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String message = "get ";
+				String message = "get@@";
 				// add the proper get information
 				// we have many if statements to reduce whitespace for more easier parsing
 				if (!getColour.getText().equals("")) {
-					message = message + "c" + getColour.getText() + " ";
+					message = message + "c" + getColour.getText() + "@@";
 				}
 
 				if (!getContains.getText().equals("")) {
-					message = message + "d" + getContains.getText() + " ";
+					message = message + "d" + getContains.getText() + "@@";
 				}
 
 				if (!getRefersTo.getText().equals("")) {
-					message = message + "r" + getRefersTo.getText() + " ";
+					message = message + "r" + getRefersTo.getText();
 				}
 
-				// send the get message to the server
+				// send the get message to the server	
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out.println(message);
+					output.setText(in.readLine());
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
