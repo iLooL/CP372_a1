@@ -1,5 +1,6 @@
 package board;
 
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -13,15 +14,19 @@ import java.io.PrintWriter;
  */
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JTextField;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 public class Client extends javax.swing.JFrame {
 	private static final long serialVersionUID = 1L;
 	public boolean isConnected = false;
 	public Socket socket;
+
 	public Client() {
 		initComponents();
 	}
@@ -35,39 +40,47 @@ public class Client extends javax.swing.JFrame {
 		jLabel2 = new javax.swing.JLabel();
 		connectButton = new javax.swing.JButton();
 		connectButton.setAction(action);
-		colours = new javax.swing.JComboBox();
 		postButton = new javax.swing.JButton();
 		// posts note to the board
 		postButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(postXCoordinate.getText().equals("") || 
-				   postXCoordinate.getText().equals("") ||
-				   height.getText().equals("") ||
-				   width.getText().equals("")) {
+				if (postXCoordinate.getText().equals("") || postXCoordinate.getText().equals("")
+						|| height.getText().equals("") || width.getText().equals("")) {
 					// UPDATE DOC TO SAY WHAT FIELDS ARE MANDATORY TO POST A NOTE
-					output.setText("Please fill in all mandatory fields to post a note");
-				} 
-				else if(!isInteger(postXCoordinate.getText()) || !isInteger(postYCoordinate.getText()) ||
-						!isInteger(height.getText()) || !isInteger(width.getText())) {
+					output.setText("Please fill in all mandatory fields to post a note.");
+				} else if (!isInteger(postXCoordinate.getText()) || !isInteger(postYCoordinate.getText())
+						|| !isInteger(height.getText()) || !isInteger(width.getText())) {
 					output.setText("Please enter an integers in the coordinate and dimension text fields.");
 				} else {
 					// send post to the server for processing
-			        try {
-			        	// ADD THE PROPER CODE TO PUT COLOUR INTO THIS STRING
-						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-						String post = "post " + postXCoordinate.getText() + " "
-								+ postXCoordinate.getText() + " "
-								+ height.getText() + " "
-								+ width.getText() + " "
-								+ contentTextArea.getText();
-						out.println(post);
+					try {
+						// ADD THE PROPER CODE TO PUT COLOUR INTO THIS STRING
+						String colour, content;
+						if(textField.getText().equals("")) {
+							colour = "default";
+						}
+						else {
+							colour = textField.getText();
+						}
+						if(contentTextArea.getText().equals("")) {
+							content = "empty";
+						}
+						else {
+							content = contentTextArea.getText();
+						}
 						
+						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						String post = "post " + postXCoordinate.getText() + " " + postXCoordinate.getText() + " "
+								+ height.getText() + " " + width.getText() + " " + content
+								+ " " + colour;
+						out.println(post);
+
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
 				}
-				
+
 			}
 		});
 		jLabel3 = new javax.swing.JLabel();
@@ -81,24 +94,24 @@ public class Client extends javax.swing.JFrame {
 		pinButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
+				if (pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
 					output.setText("Please enter an integer in both text fields.");
-				}
-				else if(!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
+				} else if (!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
 					output.setText("Please enter an integer in both text fields.");
-				}
-				else {
+				} else {
 					// send it to the server and process
-			        try {
+					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						String pin = "pin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
 						out.println(pin);
-						
+						output.setText(in.readLine());
+
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
 				}
-				
+
 			}
 		});
 		disconnectButton = new javax.swing.JButton();
@@ -120,24 +133,24 @@ public class Client extends javax.swing.JFrame {
 		unpinButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
+				if (pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
 					output.setText("Please enter an integer in both text fields.");
-				}
-				else if(!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
+				} else if (!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
 					output.setText("Please enter an integer in both text fields.");
-				}
-				else {
+				} else {
 					// send it to the server and process
-			        try {
+					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						String pin = "unpin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
 						out.println(pin);
-						
+						output.setText(in.readLine());
+
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
 				}
-				
+
 			}
 		});
 		jLabel8 = new javax.swing.JLabel();
@@ -154,11 +167,10 @@ public class Client extends javax.swing.JFrame {
 		jLabel13 = new javax.swing.JLabel();
 		jSeparator1 = new javax.swing.JSeparator();
 		jLabel14 = new javax.swing.JLabel();
-		jSeparator2 = new javax.swing.JSeparator();
-		jSeparator3 = new javax.swing.JSeparator();
 		jScrollPane1 = new javax.swing.JScrollPane();
 		output = new javax.swing.JTextArea();
 		jLabel15 = new javax.swing.JLabel();
+		jLabel15.setFont(new Font("Tahoma", Font.BOLD, 11));
 		getPinsButton = new javax.swing.JButton();
 		getPinsButton.addActionListener(new ActionListener() {
 			@Override
@@ -170,11 +182,11 @@ public class Client extends javax.swing.JFrame {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 					String message = "getPins";
 					out.println(message);
-					
+
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-				
+
 			}
 		});
 		getColour = new javax.swing.JTextField();
@@ -186,31 +198,31 @@ public class Client extends javax.swing.JFrame {
 		getInfoButton = new javax.swing.JButton();
 		getInfoButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {	
+			public void actionPerformed(ActionEvent e) {
 				String message = "get ";
 				// add the proper get information
 				// we have many if statements to reduce whitespace for more easier parsing
-				if(!getColour.getText().equals("")) {
+				if (!getColour.getText().equals("")) {
 					message = message + "c" + getColour.getText() + " ";
 				}
-				
-				if(!getContains.getText().equals("")) {
+
+				if (!getContains.getText().equals("")) {
 					message = message + "d" + getContains.getText() + " ";
 				}
-				
-				if(!getRefersTo.getText().equals("")) {
+
+				if (!getRefersTo.getText().equals("")) {
 					message = message + "r" + getRefersTo.getText() + " ";
 				}
-				
+
 				// send the get message to the server
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 					out.println(message);
-					
+
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-				
+
 			}
 		});
 		clearButton = new javax.swing.JButton();
@@ -221,10 +233,10 @@ public class Client extends javax.swing.JFrame {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 					String message = "clear";
 					out.println(message);
-					
+
 				} catch (IOException e1) {
 					e1.printStackTrace();
-				}	
+				}
 			}
 		});
 
@@ -249,9 +261,6 @@ public class Client extends javax.swing.JFrame {
 				}
 			}
 		});
-
-		colours.setModel(
-				new javax.swing.DefaultComboBoxModel(new String[] { "Colour 1", "Colour 2", "Colour 3", "Colour 4" }));
 
 		postButton.setText("Post");
 
@@ -310,8 +319,6 @@ public class Client extends javax.swing.JFrame {
 
 		jLabel14.setText("Post Color:");
 
-		jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
-
 		output.setEditable(false);
 		output.setColumns(20);
 		output.setRows(5);
@@ -331,250 +338,200 @@ public class Client extends javax.swing.JFrame {
 
 		clearButton.setText("Clear");
 
+		textField = new JTextField();
+		textField.setColumns(10);
+
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-		getContentPane().setLayout(layout);
-		layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addComponent(jSeparator1)
-				.addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
-						layout.createSequentialGroup().addGap(0, 0, Short.MAX_VALUE).addComponent(jSeparator3,
-								javax.swing.GroupLayout.PREFERRED_SIZE, 417, javax.swing.GroupLayout.PREFERRED_SIZE))
-				.addGroup(layout.createSequentialGroup().addGroup(layout
-						.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-						.addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-								.addContainerGap()
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-										.addGroup(layout.createSequentialGroup().addComponent(getPinsButton)
-												.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-												.addComponent(getInfoButton)
-												.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-												.addComponent(clearButton, javax.swing.GroupLayout.DEFAULT_SIZE,
-														javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-												.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
-										.addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout
-												.createSequentialGroup().addGap(0, 0, Short.MAX_VALUE)
-												.addGroup(layout
-														.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-														.addComponent(jLabel18,
-																javax.swing.GroupLayout.Alignment.TRAILING)
-														.addComponent(jLabel16).addComponent(jLabel17))
-												.addGap(18, 18, 18)
-												.addGroup(layout
-														.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING,
-																false)
-														.addComponent(getColour, javax.swing.GroupLayout.DEFAULT_SIZE,
-																83, Short.MAX_VALUE)
-														.addComponent(getContains).addComponent(getRefersTo))
-												.addGap(62, 62, 62)))
-								.addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE,
-										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-						.addGroup(layout.createSequentialGroup().addGroup(layout
-								.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-								.addGroup(layout.createSequentialGroup().addGap(51, 51, 51).addComponent(jLabel9)
-										.addGap(72, 72, 72).addComponent(jLabel4))
-								.addGroup(layout.createSequentialGroup().addContainerGap().addComponent(jLabel14)
-										.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-										.addComponent(colours, javax.swing.GroupLayout.PREFERRED_SIZE,
-												javax.swing.GroupLayout.DEFAULT_SIZE,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
-										.addGap(95, 95, 95)
-										.addComponent(postButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83,
-												javax.swing.GroupLayout.PREFERRED_SIZE))
-								.addGroup(layout.createSequentialGroup().addGap(153, 153, 153).addComponent(jLabel8)
-										.addGap(60, 60, 60).addComponent(jLabel15)))
-								.addGap(0, 0, Short.MAX_VALUE)))
-						.addContainerGap())
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING)
+				.addComponent(jSeparator1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+						GroupLayout.PREFERRED_SIZE)
 				.addGroup(layout.createSequentialGroup()
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-								.addGroup(layout
-										.createSequentialGroup().addGroup(layout.createParallelGroup(
-												javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-														layout.createSequentialGroup().addGap(58, 58, 58)
-																.addComponent(jLabel3))
-												.addGroup(layout.createSequentialGroup().addContainerGap()
-														.addGroup(layout.createParallelGroup(
-																javax.swing.GroupLayout.Alignment.LEADING)
-																.addComponent(jLabel1).addComponent(jLabel2))
-														.addPreferredGap(
-																javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-														.addGroup(layout
-																.createParallelGroup(
-																		javax.swing.GroupLayout.Alignment.LEADING,
-																		false)
-																.addComponent(portNumber,
-																		javax.swing.GroupLayout.DEFAULT_SIZE, 101,
+						.addGroup(layout.createParallelGroup(Alignment.LEADING).addGroup(layout
+								.createSequentialGroup().addContainerGap()
+								.addGroup(layout.createParallelGroup(Alignment.TRAILING)
+										.addGroup(layout.createSequentialGroup().addComponent(getPinsButton)
+												.addPreferredGap(ComponentPlacement.RELATED).addComponent(getInfoButton)
+												.addPreferredGap(ComponentPlacement.RELATED)
+												.addComponent(
+														clearButton, GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+												.addPreferredGap(ComponentPlacement.UNRELATED))
+										.addGroup(
+												layout.createSequentialGroup().addGap(0, 22, Short.MAX_VALUE)
+														.addGroup(layout.createParallelGroup(Alignment.LEADING)
+																.addComponent(jLabel18, Alignment.TRAILING)
+																.addComponent(jLabel16).addComponent(jLabel17))
+														.addGap(18)
+														.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
+																.addComponent(getColour, GroupLayout.DEFAULT_SIZE, 83,
 																		Short.MAX_VALUE)
-																.addComponent(ipAddress)))
-												.addGroup(layout.createSequentialGroup().addGap(2, 2, 2)
-														.addComponent(connectButton,
-																javax.swing.GroupLayout.PREFERRED_SIZE, 89,
-																javax.swing.GroupLayout.PREFERRED_SIZE)
-														.addPreferredGap(
-																javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-														.addComponent(disconnectButton)))
-										.addGap(18, 18, 18)
-										.addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 2,
-												javax.swing.GroupLayout.PREFERRED_SIZE))
-								.addGroup(layout.createSequentialGroup().addContainerGap().addComponent(
-										jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE,
-										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(layout
-								.createSequentialGroup().addGap(8, 8, 8)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-										.addComponent(jLabel10).addComponent(jLabel11).addComponent(jLabel12)
-										.addComponent(jLabel13))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-										.addComponent(postXCoordinate, javax.swing.GroupLayout.PREFERRED_SIZE, 80,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
-										.addGroup(layout
-												.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-												.addComponent(width, javax.swing.GroupLayout.Alignment.LEADING)
-												.addComponent(height, javax.swing.GroupLayout.Alignment.LEADING)
-												.addComponent(postYCoordinate,
-														javax.swing.GroupLayout.Alignment.LEADING,
-														javax.swing.GroupLayout.PREFERRED_SIZE, 80,
-														javax.swing.GroupLayout.PREFERRED_SIZE)))
-								.addGap(0, 0, Short.MAX_VALUE))
-								.addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-										.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
-												javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-												.addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
-														layout.createSequentialGroup().addGap(60, 60, 60)
-																.addComponent(jLabel5).addGap(73, 73, 73))
-												.addGroup(layout.createSequentialGroup().addGroup(layout
-														.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-														.addComponent(jLabel6).addComponent(jLabel7))
-														.addPreferredGap(
-																javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-														.addGroup(layout
-																.createParallelGroup(
-																		javax.swing.GroupLayout.Alignment.LEADING)
-																.addComponent(pinXCoordinate,
-																		javax.swing.GroupLayout.PREFERRED_SIZE, 80,
-																		javax.swing.GroupLayout.PREFERRED_SIZE)
-																.addComponent(pinYCoordinate,
-																		javax.swing.GroupLayout.PREFERRED_SIZE, 80,
-																		javax.swing.GroupLayout.PREFERRED_SIZE)))
-												.addGroup(layout.createSequentialGroup().addGap(8, 8, 8)
-														.addComponent(pinButton, javax.swing.GroupLayout.PREFERRED_SIZE,
-																57, javax.swing.GroupLayout.PREFERRED_SIZE)
-														.addPreferredGap(
-																javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-														.addComponent(unpinButton)))
-										.addGap(29, 29, 29)))));
-		layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(layout
-				.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(layout
-						.createSequentialGroup().addContainerGap()
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-								.addComponent(jLabel3).addComponent(jLabel5))
-						.addGap(7, 7, 7)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-								.addComponent(ipAddress, javax.swing.GroupLayout.PREFERRED_SIZE,
-										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addComponent(jLabel1)
-								.addComponent(pinXCoordinate, javax.swing.GroupLayout.PREFERRED_SIZE,
-										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addComponent(jLabel6))
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-								.addComponent(portNumber, javax.swing.GroupLayout.PREFERRED_SIZE,
-										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addComponent(jLabel2)
-								.addComponent(pinYCoordinate, javax.swing.GroupLayout.PREFERRED_SIZE,
-										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addComponent(jLabel7))
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-								.addComponent(connectButton)
-								.addComponent(pinButton, javax.swing.GroupLayout.PREFERRED_SIZE,
-										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addComponent(disconnectButton).addComponent(unpinButton)))
-						.addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 120,
-								javax.swing.GroupLayout.PREFERRED_SIZE))
-				.addGap(4, 4, 4)
-				.addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE,
-						javax.swing.GroupLayout.PREFERRED_SIZE)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-						.addGroup(
-								layout.createSequentialGroup().addGap(12, 12, 12).addComponent(jLabel9).addGap(1, 1, 1))
-						.addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
-								layout.createSequentialGroup()
-										.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-										.addComponent(jLabel4)
-										.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-						.addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 96,
-								javax.swing.GroupLayout.PREFERRED_SIZE)
-						.addGroup(layout.createSequentialGroup()
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-										.addComponent(postXCoordinate, javax.swing.GroupLayout.PREFERRED_SIZE,
-												javax.swing.GroupLayout.DEFAULT_SIZE,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
-										.addComponent(jLabel10))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-										.addComponent(postYCoordinate, javax.swing.GroupLayout.PREFERRED_SIZE,
-												javax.swing.GroupLayout.DEFAULT_SIZE,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
+																.addComponent(getContains).addComponent(getRefersTo))
+														.addGap(62)))
+								.addComponent(
+										jScrollPane1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE))
+								.addGroup(layout.createSequentialGroup().addGroup(layout
+										.createParallelGroup(Alignment.LEADING)
+										.addGroup(layout.createSequentialGroup().addGap(51).addComponent(jLabel9)
+												.addGap(72).addComponent(jLabel4))
+										.addGroup(layout.createSequentialGroup().addContainerGap().addGroup(layout
+												.createParallelGroup(Alignment.TRAILING).addComponent(jLabel15)
+												.addGroup(layout.createSequentialGroup().addComponent(jLabel14)
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(textField, GroupLayout.PREFERRED_SIZE,
+																GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+														.addGap(80).addComponent(postButton, GroupLayout.PREFERRED_SIZE,
+																83, GroupLayout.PREFERRED_SIZE)))))
+										.addGap(27, 96, Short.MAX_VALUE)))
+						.addContainerGap())
+				.addGroup(
+						layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup(Alignment.LEADING)
+										.addGroup(layout.createSequentialGroup().addGap(58).addComponent(jLabel3))
+										.addGroup(layout.createSequentialGroup().addContainerGap()
+												.addGroup(layout.createParallelGroup(Alignment.LEADING)
+														.addComponent(jLabel1).addComponent(jLabel2))
+												.addPreferredGap(ComponentPlacement.UNRELATED)
+												.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
+														.addComponent(portNumber, GroupLayout.DEFAULT_SIZE, 101,
+																Short.MAX_VALUE)
+														.addComponent(ipAddress)))
+										.addGroup(layout.createSequentialGroup().addGap(2)
+												.addComponent(connectButton, GroupLayout.PREFERRED_SIZE, 89,
+														GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.UNRELATED)
+												.addComponent(disconnectButton))
+										.addGroup(layout.createSequentialGroup().addContainerGap()
+												.addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+								.addGap(20)
+								.addGroup(layout.createParallelGroup(
+										Alignment.TRAILING)
+										.addGroup(layout.createSequentialGroup().addGap(8).addGroup(layout
+												.createParallelGroup(Alignment.LEADING).addComponent(jLabel10)
+												.addComponent(jLabel11).addComponent(jLabel12).addComponent(jLabel13))
+												.addPreferredGap(ComponentPlacement.RELATED)
+												.addGroup(layout.createParallelGroup(Alignment.LEADING)
+														.addComponent(postXCoordinate, GroupLayout.PREFERRED_SIZE, 80,
+																GroupLayout.PREFERRED_SIZE)
+														.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+																.addComponent(width, Alignment.LEADING).addComponent(
+																		height, Alignment.LEADING)
+																.addComponent(postYCoordinate, Alignment.LEADING,
+																		GroupLayout.PREFERRED_SIZE, 80,
+																		GroupLayout.PREFERRED_SIZE)))
+												.addGap(0, 58, Short.MAX_VALUE))
+										.addGroup(layout.createSequentialGroup()
+												.addPreferredGap(ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
+												.addGroup(layout.createParallelGroup(Alignment.TRAILING)
+														.addGroup(layout.createSequentialGroup().addComponent(jLabel5)
+																.addGap(73))
+														.addGroup(layout.createSequentialGroup()
+																.addGroup(layout.createParallelGroup(Alignment.LEADING)
+																		.addComponent(jLabel6).addComponent(jLabel7))
+																.addPreferredGap(ComponentPlacement.RELATED)
+																.addGroup(layout.createParallelGroup(Alignment.LEADING)
+																		.addComponent(pinXCoordinate,
+																				GroupLayout.PREFERRED_SIZE, 80,
+																				GroupLayout.PREFERRED_SIZE)
+																		.addComponent(pinYCoordinate,
+																				GroupLayout.PREFERRED_SIZE, 80,
+																				GroupLayout.PREFERRED_SIZE)))
+														.addGroup(layout.createSequentialGroup()
+																.addComponent(pinButton, GroupLayout.PREFERRED_SIZE, 57,
+																		GroupLayout.PREFERRED_SIZE)
+																.addPreferredGap(ComponentPlacement.UNRELATED)
+																.addComponent(unpinButton)))
+												.addGap(29))))
+				.addGroup(layout.createSequentialGroup().addGap(49).addComponent(jLabel8).addContainerGap(282,
+						Short.MAX_VALUE)));
+		layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING).addGroup(layout.createSequentialGroup()
+				.addContainerGap()
+				.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(jLabel3).addComponent(jLabel5))
+				.addGap(7)
+				.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+						.addComponent(ipAddress, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
+						.addComponent(jLabel1)
+						.addComponent(pinXCoordinate, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
+						.addComponent(jLabel6))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+						.addComponent(portNumber, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
+						.addComponent(jLabel2)
+						.addComponent(pinYCoordinate, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
+						.addComponent(jLabel7))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(connectButton)
+						.addComponent(pinButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
+						.addComponent(disconnectButton).addComponent(unpinButton))
+				.addGap(17)
+				.addComponent(
+						jSeparator1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.TRAILING)
+						.addGroup(layout.createSequentialGroup().addComponent(jLabel9).addGap(1))
+						.addGroup(layout.createSequentialGroup().addComponent(jLabel4)
+								.addPreferredGap(ComponentPlacement.UNRELATED)))
+				.addGroup(layout.createParallelGroup(Alignment.LEADING)
+						.addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE, 96, GroupLayout.PREFERRED_SIZE)
+						.addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(Alignment.BASELINE)
+								.addComponent(postXCoordinate, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE)
+								.addComponent(jLabel10)).addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+										.addComponent(postYCoordinate, GroupLayout.PREFERRED_SIZE,
+												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 										.addComponent(jLabel11))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-										.addComponent(height, javax.swing.GroupLayout.PREFERRED_SIZE,
-												javax.swing.GroupLayout.DEFAULT_SIZE,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+										.addComponent(height, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.PREFERRED_SIZE)
 										.addComponent(jLabel12))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-										.addComponent(width, javax.swing.GroupLayout.PREFERRED_SIZE,
-												javax.swing.GroupLayout.DEFAULT_SIZE,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+										.addComponent(width, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.PREFERRED_SIZE)
 										.addComponent(jLabel13))))
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-						.addComponent(colours, javax.swing.GroupLayout.PREFERRED_SIZE,
-								javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-						.addComponent(jLabel14).addComponent(postButton))
-				.addGap(7, 7, 7)
-				.addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE,
-						javax.swing.GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-						.addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING).addComponent(jLabel8))
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-						.addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE,
-								javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(jLabel14).addComponent(postButton)
+						.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE))
+				.addGap(15)
+				.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(jLabel8).addComponent(jLabel15))
+				.addPreferredGap(ComponentPlacement.UNRELATED)
+				.addGroup(layout.createParallelGroup(Alignment.LEADING)
+						.addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
 						.addGroup(layout.createSequentialGroup()
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-										.addComponent(getColour, javax.swing.GroupLayout.PREFERRED_SIZE,
-												javax.swing.GroupLayout.DEFAULT_SIZE,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+										.addComponent(getColour, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.PREFERRED_SIZE)
 										.addComponent(jLabel16))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-										.addComponent(getContains, javax.swing.GroupLayout.PREFERRED_SIZE,
-												javax.swing.GroupLayout.DEFAULT_SIZE,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+										.addComponent(getContains, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.PREFERRED_SIZE)
 										.addComponent(jLabel17))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-										.addComponent(getRefersTo, javax.swing.GroupLayout.PREFERRED_SIZE,
-												javax.swing.GroupLayout.DEFAULT_SIZE,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+										.addComponent(getRefersTo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.PREFERRED_SIZE)
 										.addComponent(jLabel18))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-										.addComponent(getInfoButton).addComponent(getPinsButton)
-										.addComponent(clearButton))))
-				.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(getInfoButton)
+										.addComponent(getPinsButton).addComponent(clearButton))))
+				.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+		getContentPane().setLayout(layout);
 
 		pack();
 	}
 
 	private void pinYCoordinateAction(java.awt.event.ActionEvent evt) {
-		
+
 	}
 
 	private void connectButtonAction(java.awt.event.ActionEvent evt)
@@ -624,16 +581,15 @@ public class Client extends javax.swing.JFrame {
 			}
 		});
 	}
-	
-	public boolean isInteger(String num) { 
-	    try {
-	        Integer.parseInt(num);
-	        return true; 
-	    }
-	    catch(Exception e) { 
-	        return false;
-	    }
-	} 
+
+	public boolean isInteger(String num) {
+		try {
+			Integer.parseInt(num);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
 
 	private javax.swing.JButton connectButton;
 	private javax.swing.JButton pinButton;
@@ -643,7 +599,6 @@ public class Client extends javax.swing.JFrame {
 	private javax.swing.JButton getPinsButton;
 	private javax.swing.JButton getInfoButton;
 	private javax.swing.JButton clearButton;
-	private javax.swing.JComboBox colours;
 	private javax.swing.JLabel jLabel1;
 	private javax.swing.JLabel jLabel10;
 	private javax.swing.JLabel jLabel11;
@@ -665,8 +620,6 @@ public class Client extends javax.swing.JFrame {
 	private javax.swing.JScrollPane jScrollPane1;
 	private javax.swing.JScrollPane jScrollPane2;
 	private javax.swing.JSeparator jSeparator1;
-	private javax.swing.JSeparator jSeparator2;
-	private javax.swing.JSeparator jSeparator3;
 	private javax.swing.JTextArea output;
 	private javax.swing.JTextArea contentTextArea;
 	private javax.swing.JTextField pinXCoordinate;
@@ -681,6 +634,7 @@ public class Client extends javax.swing.JFrame {
 	private javax.swing.JTextField width;
 	private javax.swing.JTextField getColour;
 	private final Action action = new SwingAction();
+	private JTextField textField;
 
 	// End of variables declaration//GEN-END:variables
 	private class SwingAction extends AbstractAction {
