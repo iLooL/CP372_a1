@@ -52,16 +52,16 @@ public class SBoard {
 		}
 	}
     
-    public class Note{
+    public static class Note{
     	public String content;
     	public boolean isPinned;
     	public String colour;
-    	public ArrayList<Pin> points;
+    	public ArrayList<Pin> points = new ArrayList<Pin>();
     	public Pin point;
     	public int width;
     	public int height;
     	
-    	public void note(String content, String colour, int x, int y, int width, int height) {
+    	public Note(String content, String colour, int x, int y, int width, int height) {
     		this.content = content;
     		this.isPinned = false;
     		this.colour = colour;
@@ -89,7 +89,6 @@ public class SBoard {
         }
     }
     
-   //private static class Boards implements Runnable {
     private static class Boards extends Thread {
         private Socket socket;
         
@@ -115,18 +114,46 @@ public class SBoard {
                     	int x = Integer.parseInt(parsed[1]);
                     	int y = Integer.parseInt(parsed[2]);
                     	Pin p = new Pin(x, y);
-                    	board.pins.add(p);
-                    	updateNotes(board.pins, board.notes);
-                    	System.out.println("X: " + x + " Y: " + y);
-                    	
+                    	boolean on = isPinOnBoard(p);
+                    	if(on) {
+                    		board.pins.add(p);
+                        	updateNotes(p, board.notes);
+                        	out.println("Pin " + x +" "+ y + " successful.");
+                    	}
+                    	else {
+                    		// send client error message that requested pin is off the board bounds
+                    		out.println("Pin out of board boundaries.");
+                    	}                    	
                     }
                     else if(parsed[0].equals("unpin")) {
                     	int x = Integer.parseInt(parsed[1]);
                     	int y = Integer.parseInt(parsed[2]);
-                    	int result = removePin(board.pins, x, y);
-                    	System.out.println("pin removed (1 = success, 0 = fail/no pin): " + result);
+                    	Pin p = new Pin(x, y);
+                    	int result = removePin(p, board.pins);
+                    	if(result == 1) {
+                    		updateUnpin(p, board.notes);
+                    		out.println("Removal of pin " + x +" "+ y + " is successful.");
+                    	}
+                    	else {
+                    		out.println("Removal of pin " + x +" "+ y +" is unsuccessful,\n please enter valid input.");
+                    	}
                     }
                     else if(parsed[0].equals("post")) {
+                    	
+                    	if (parsed[6].equals("default")) {
+							parsed[6] = colours[0];
+						}
+						if (checkColour(parsed[6]) == false) {
+							out.println("Please enter a valid colour.");
+						} else if (Integer.parseInt(parsed[1]) < 0 || Integer.parseInt(parsed[2]) < 0
+								|| Integer.parseInt(parsed[1]) + Integer.parseInt(parsed[4]) > board.width
+								|| Integer.parseInt(parsed[2]) + Integer.parseInt(parsed[3]) > board.height) {
+							out.println("Please stay within board boundaries.");
+						} else {
+							createPost(parsed);
+							out.println("Note created successfully");
+						}
+
                     	
                     }
                     else if(parsed[0].equals("getPins")) {
@@ -136,10 +163,25 @@ public class SBoard {
                     	}
                     }
                     else if(parsed[0].equals("get")) {
+                    	String message = "Notes return based upon input: \n\n";
+                    	if(parsed.length == 1) {
+                    		// print out all the notes
+                    		int size = board.notes.size();
+                    		for(int i = 0; i < size; i++) {
+                    			System.out.println("fuck");
+                    			message = message + "Note " + i + 1 + ": \n";
+                    			message = message + "Colour - " + board.notes.get(i).colour;
+                    			message = message + "Content - " + board.notes.get(i).content;
+                    			message = message + "\n";
+                    			System.out.println("fuck3");
+                    		}
+                    		
+                    		out.println(message);
+                    	}
                     	
                     }
                     else if(parsed[0].equals("clear")) {
-                    	
+                    	out.println(clear(board.notes));
                     }
                     
                     
@@ -157,13 +199,39 @@ public class SBoard {
         }
         
         
+        private String clear(ArrayList<Note> notes) {
+        	// add to the removed string "Notes cleared: \n"
+			String removed = "";
+			if (notes.size() == 0) {
+				removed = "0";
+			} else {
+				for (int i = 0; i < notes.size(); i++) {
+					if (notes.get(i).isPinned == false) {
+						removed = removed + notes.get(i).content + "@@";
+						board.notes.remove(i);
+					}
+				}
+			}
+			return removed;
+		}
+
+		private boolean checkColour(String colour) {
+			boolean result = false;
+			for (int i = 0; i < colours.length; i++) {
+				if (colour.toLowerCase().equals(colours[i].toLowerCase())) {
+					result = true;
+				}
+			}
+			return result;
+		}
+        
         // returns 1 if it is removed
         // else 0
-        private int removePin(ArrayList<Pin> pins, int x, int y) {
+        private int removePin(Pin p, ArrayList<Pin> pins) {
         	int size = pins.size();
         	for(int i = 0; i < size; i++) {
-        		if(pins.get(i).x == x) {
-        			if(pins.get(i).y == y) {
+        		if(pins.get(i).x == p.x) {
+        			if(pins.get(i).y == p.y) {
         				pins.remove(i);
         				return 1;
         			}
@@ -172,16 +240,55 @@ public class SBoard {
         	return 0;
         }
         
-        private void updateNotes(ArrayList<Pin> pins, ArrayList<Note> notes) {
-        	int pinSize = pins.size();
-        	int noteSize = notes.size();
-        	for(int i = 0; i < pinSize; i++) {
-        		for(int j = 0; j < noteSize; j++) {
-        			//do the math stuff here
+        // updates the notes pin status
+        private void updateUnpin(Pin p, ArrayList<Note> notes) {
+        	int size = notes.size();
+        	for(int i = 0; i < size; i++) {
+        		if(notes.get(i).points.get(i).x == p.x &&
+        		   notes.get(i).points.get(i).y == p.y	) {
+        			notes.get(i).points.remove(i);
+        			// if after removing that pin, if there are no
+        			// pins left then it is not pinned; set to false
+        			if(notes.get(i).points.size() == 0) {
+        				notes.get(i).isPinned = false;
+        			}
         		}
         	}
         }
         
+        // updates notes when a new pin has been added to the board
+        private void updateNotes(Pin pin, ArrayList<Note> notes) {
+        	int noteSize = notes.size();
+        	for(int i = 0; i < noteSize; i++) {
+        		if(notes.get(i).point.x >= pin.x &&
+        		   notes.get(i).point.x + width <= pin.x &&
+        		   notes.get(i).point.y >= pin.y &&
+        		   notes.get(i).point.y + height <= pin.y) {
+        			notes.get(i).isPinned = true;
+        			notes.get(i).points.add(pin);
+        		}
+        	}
+        }
+        
+        // tells us whether the pin is on the board
+        // we must know this before adding the pin to the board object
+        private boolean isPinOnBoard(Pin pin) {
+        	boolean on;
+        	if((pin.x > width || pin.y > height) &&
+        	   (pin.x < 0 || pin.y < 0)) {
+        		on = false;
+        	}
+        	else {
+        		on = true;
+        	}
+        	return on;
+        }
+        
+        private void createPost(String[] values) {
+			Note newNote = new Note(values[5], values[6], Integer.parseInt(values[1]), Integer.parseInt(values[2]),
+					Integer.parseInt(values[4]), Integer.parseInt(values[3]));
+			board.notes.add(newNote);
+		}
         
     }
 }
