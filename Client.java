@@ -45,21 +45,35 @@ public class Client extends javax.swing.JFrame {
 		postButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (postXCoordinate.getText().equals("") || postXCoordinate.getText().equals("")
+				if (postXCoordinate.getText().equals("") || postYCoordinate.getText().equals("")
 						|| height.getText().equals("") || width.getText().equals("")) {
 					// UPDATE DOC TO SAY WHAT FIELDS ARE MANDATORY TO POST A NOTE
-					output.setText("Please fill in all mandatory fields\n to post a note");
+					output.setText("Please fill in all mandatory fields to post a note.");
 				} else if (!isInteger(postXCoordinate.getText()) || !isInteger(postYCoordinate.getText())
 						|| !isInteger(height.getText()) || !isInteger(width.getText())) {
-					output.setText("Please enter an integers in the\n coordinate and dimension text fields.");
+					output.setText("Please enter an integers in the coordinate and dimension text fields.");
 				} else {
 					// send post to the server for processing
 					try {
 						// ADD THE PROPER CODE TO PUT COLOUR INTO THIS STRING
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+						String colour, content;
+						if (textField.getText().equals("")) {
+							colour = "default";
+						} else {
+							colour = textField.getText();
+						}
+						if (contentTextArea.getText().equals("")) {
+							content = "empty";
+						} else {
+							content = contentTextArea.getText();
+						}
+
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-						String post = "post " + postXCoordinate.getText() + " " + postXCoordinate.getText() + " "
-								+ height.getText() + " " + width.getText() + " " + contentTextArea.getText();
+						String post = "post " + postXCoordinate.getText() + " " + postYCoordinate.getText() + " "
+								+ height.getText() + " " + width.getText() + " " + content + " " + colour;
 						out.println(post);
+						output.setText(in.readLine());
 
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -87,8 +101,10 @@ public class Client extends javax.swing.JFrame {
 					// send it to the server and process
 					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						String pin = "pin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
 						out.println(pin);
+						output.setText(in.readLine());
 
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -124,8 +140,10 @@ public class Client extends javax.swing.JFrame {
 					// send it to the server and process
 					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						String pin = "unpin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
 						out.println(pin);
+						output.setText(in.readLine());
 
 					} catch (IOException e1) {
 						e1.printStackTrace();
