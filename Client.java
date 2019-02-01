@@ -70,8 +70,8 @@ public class Client extends javax.swing.JFrame {
 						}
 
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-						String post = "post " + postXCoordinate.getText() + " " + postYCoordinate.getText() + " "
-								+ height.getText() + " " + width.getText() + " " + content + " " + colour;
+						String post = "post@@" + postXCoordinate.getText() + "@@" + postYCoordinate.getText() + "@@"
+								+ height.getText() + "@@" + width.getText() + "@@" + content + "@@" + colour;
 						out.println(post);
 						output.setText(in.readLine());
 

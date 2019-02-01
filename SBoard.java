@@ -108,7 +108,7 @@ public class SBoard {
 					// THE CODE BELOW CURRENTLY DOES NOT SEND BACK TO CLIENT
 					String input = in.readLine();
 					System.out.println(input);
-					String[] parsed = input.split(" ");
+					String[] parsed = input.split("@@");
 
 					// I think this is all of the button functionality
 					// double check if it is and delete this comment once you have
@@ -182,7 +182,8 @@ public class SBoard {
 			if (notes.size() == 0) {
 				removed = "0";
 			} else {
-				for (int i = 0; i < notes.size(); i++) {
+				int size = notes.size();
+				for (int i = size - 1; i >= 0; i--) {
 					if (notes.get(i).isPinned == false) {
 						removed = removed + notes.get(i).content + "@@";
 						board.notes.remove(i);
