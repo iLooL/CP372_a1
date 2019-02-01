@@ -2,7 +2,10 @@ package board;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -10,6 +13,7 @@ import java.io.IOException;
  */
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Scanner;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -33,9 +37,37 @@ public class Client extends javax.swing.JFrame {
 		connectButton.setAction(action);
 		colours = new javax.swing.JComboBox();
 		postButton = new javax.swing.JButton();
+		// posts note to the board
 		postButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if(postXCoordinate.getText().equals("") || 
+				   postXCoordinate.getText().equals("") ||
+				   height.getText().equals("") ||
+				   width.getText().equals("")) {
+					// UPDATE DOC TO SAY WHAT FIELDS ARE MANDATORY TO POST A NOTE
+					output.setText("Please fill in all mandatory fields to post a note");
+				} 
+				else if(!isInteger(postXCoordinate.getText()) || !isInteger(postYCoordinate.getText()) ||
+						!isInteger(height.getText()) || !isInteger(width.getText())) {
+					output.setText("Please enter an integers in the coordinate and dimension text fields.");
+				} else {
+					// send post to the server for processing
+			        try {
+			        	// ADD THE PROPER CODE TO PUT COLOUR INTO THIS STRING
+						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						String post = "post " + postXCoordinate.getText() + " "
+								+ postXCoordinate.getText() + " "
+								+ height.getText() + " "
+								+ width.getText() + " "
+								+ contentTextArea.getText();
+						out.println(post);
+						
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+				
 			}
 		});
 		jLabel3 = new javax.swing.JLabel();
@@ -49,7 +81,6 @@ public class Client extends javax.swing.JFrame {
 		pinButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("pin button pressed");
 				if(pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
 					output.setText("Please enter an integer in both text fields.");
 				}
@@ -57,7 +88,15 @@ public class Client extends javax.swing.JFrame {
 					output.setText("Please enter an integer in both text fields.");
 				}
 				else {
-					System.out.println("integer");
+					// send it to the server and process
+			        try {
+						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						String pin = "pin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						out.println(pin);
+						
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
 				}
 				
 			}
@@ -81,6 +120,24 @@ public class Client extends javax.swing.JFrame {
 		unpinButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if(pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
+					output.setText("Please enter an integer in both text fields.");
+				}
+				else if(!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
+					output.setText("Please enter an integer in both text fields.");
+				}
+				else {
+					// send it to the server and process
+			        try {
+						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						String pin = "unpin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						out.println(pin);
+						
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+				
 			}
 		});
 		jLabel8 = new javax.swing.JLabel();
@@ -106,6 +163,18 @@ public class Client extends javax.swing.JFrame {
 		getPinsButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				// to do this send a string to the server as "getPins"
+				// the server then checks for this string
+				// and it sends back a string of pins
+				try {
+					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					String message = "getPins";
+					out.println(message);
+					
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
 			}
 		});
 		getColour = new javax.swing.JTextField();
@@ -117,13 +186,45 @@ public class Client extends javax.swing.JFrame {
 		getInfoButton = new javax.swing.JButton();
 		getInfoButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e) {	
+				String message = "get ";
+				// add the proper get information
+				// we have many if statements to reduce whitespace for more easier parsing
+				if(!getColour.getText().equals("")) {
+					message = message + "c" + getColour.getText() + " ";
+				}
+				
+				if(!getContains.getText().equals("")) {
+					message = message + "d" + getContains.getText() + " ";
+				}
+				
+				if(!getRefersTo.getText().equals("")) {
+					message = message + "r" + getRefersTo.getText() + " ";
+				}
+				
+				// send the get message to the server
+				try {
+					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					out.println(message);
+					
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
 			}
 		});
 		clearButton = new javax.swing.JButton();
 		clearButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				try {
+					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					String message = "clear";
+					out.println(message);
+					
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}	
 			}
 		});
 
