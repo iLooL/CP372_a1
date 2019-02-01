@@ -35,7 +35,7 @@ public class SBoard {
         
         try {
             while (true) {
-                new Boards(listener.accept()).run();
+                new Boards(listener.accept()).start();
             }
         } finally {
             listener.close();
@@ -89,8 +89,8 @@ public class SBoard {
         }
     }
     
-   private static class Boards implements Runnable {
-    //private static class Boards extends Thread {
+   //private static class Boards implements Runnable {
+    private static class Boards extends Thread {
         private Socket socket;
         
         public Boards(Socket socket) {
@@ -130,16 +130,16 @@ public class SBoard {
                     	
                     }
                     else if(parsed[0].equals("getPins")) {
-                    	
+                    	// use this for debugging
+                    	for(int i = 0; i < board.pins.size(); i++) {
+                    		System.out.println("x: "+ board.pins.get(i).x + " y: " + board.pins.get(i).y);
+                    	}
                     }
                     else if(parsed[0].equals("get")) {
                     	
                     }
                     else if(parsed[0].equals("clear")) {
-                    	// use this for debugging
-                    	for(int i = 0; i < board.pins.size(); i++) {
-                    		System.out.println("x: "+ board.pins.get(i).x + " y: " + board.pins.get(i).y);
-                    	}
+                    	
                     }
                     
                     
