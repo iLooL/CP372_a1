@@ -1,4 +1,4 @@
-package cp372_a1;
+package board;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -6,6 +6,12 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -35,9 +41,46 @@ public class Client extends javax.swing.JFrame {
 		connectButton = new javax.swing.JButton();
 		connectButton.setAction(action);
 		postButton = new javax.swing.JButton();
+		// posts note to the board
 		postButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (postXCoordinate.getText().equals("") || postYCoordinate.getText().equals("")
+						|| height.getText().equals("") || width.getText().equals("")) {
+					// UPDATE DOC TO SAY WHAT FIELDS ARE MANDATORY TO POST A NOTE
+					output.setText("Please fill in all mandatory fields to post a note.");
+				} else if (!isInteger(postXCoordinate.getText()) || !isInteger(postYCoordinate.getText())
+						|| !isInteger(height.getText()) || !isInteger(width.getText())) {
+					output.setText("Please enter an integers in the coordinate and dimension text fields.");
+				} else {
+					// send post to the server for processing
+					try {
+						// ADD THE PROPER CODE TO PUT COLOUR INTO THIS STRING
+						String colour, content;
+						if(textField.getText().equals("")) {
+							colour = "default";
+						}
+						else {
+							colour = textField.getText();
+						}
+						if(contentTextArea.getText().equals("")) {
+							content = "empty";
+						}
+						else {
+							content = contentTextArea.getText();
+						}
+						
+						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						String post = "post " + postXCoordinate.getText() + " " + postYCoordinate.getText() + " "
+								+ height.getText() + " " + width.getText() + " " + content
+								+ " " + colour;
+						out.println(post);
+
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+
 			}
 		});
 		jLabel3 = new javax.swing.JLabel();
@@ -51,14 +94,24 @@ public class Client extends javax.swing.JFrame {
 		pinButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("pin button pressed");
 				if (pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
 					output.setText("Please enter an integer in both text fields.");
 				} else if (!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
 					output.setText("Please enter an integer in both text fields.");
 				} else {
-					System.out.println("integer");
+					// send it to the server and process
+					try {
+						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+						String pin = "pin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						out.println(pin);
+						output.setText(in.readLine());
+
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
 				}
+
 			}
 		});
 		disconnectButton = new javax.swing.JButton();
@@ -80,6 +133,24 @@ public class Client extends javax.swing.JFrame {
 		unpinButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
+					output.setText("Please enter an integer in both text fields.");
+				} else if (!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
+					output.setText("Please enter an integer in both text fields.");
+				} else {
+					// send it to the server and process
+					try {
+						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+						String pin = "unpin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						out.println(pin);
+						output.setText(in.readLine());
+
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+
 			}
 		});
 		jLabel8 = new javax.swing.JLabel();
@@ -104,6 +175,18 @@ public class Client extends javax.swing.JFrame {
 		getPinsButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				// to do this send a string to the server as "getPins"
+				// the server then checks for this string
+				// and it sends back a string of pins
+				try {
+					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					String message = "getPins";
+					out.println(message);
+
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+
 			}
 		});
 		getColour = new javax.swing.JTextField();
@@ -116,12 +199,57 @@ public class Client extends javax.swing.JFrame {
 		getInfoButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				String message = "get ";
+				// add the proper get information
+				// we have many if statements to reduce whitespace for more easier parsing
+				if (!getColour.getText().equals("")) {
+					message = message + "c" + getColour.getText() + " ";
+				}
+
+				if (!getContains.getText().equals("")) {
+					message = message + "d" + getContains.getText() + " ";
+				}
+
+				if (!getRefersTo.getText().equals("")) {
+					message = message + "r" + getRefersTo.getText() + " ";
+				}
+
+				// send the get message to the server
+				try {
+					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					out.println(message);
+
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+
 			}
 		});
 		clearButton = new javax.swing.JButton();
 		clearButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				try {
+					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					String message = "clear";
+					out.println(message);
+					// to test if string has content or not
+					String temp = in.readLine();
+					// if string does not have content
+					if (temp.equals("0")) {
+						output.setText("No notes are on the board.");
+						// if string has content
+					} else {
+						String[] removed = temp.split("@@");
+						output.setText("");
+						for (int i = 0; i < removed.length; i++) {
+							output.append(removed[i] + "\n");
+						}
+					}
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 
@@ -227,21 +355,21 @@ public class Client extends javax.swing.JFrame {
 		textField.setColumns(10);
 
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.TRAILING)
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING)
 				.addComponent(jSeparator1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 						GroupLayout.PREFERRED_SIZE)
 				.addGroup(layout.createSequentialGroup()
-						.addGroup(layout.createParallelGroup(Alignment.TRAILING).addGroup(layout
-								.createSequentialGroup().addContainerGap().addGroup(layout
-										.createParallelGroup(Alignment.TRAILING)
+						.addGroup(layout.createParallelGroup(Alignment.LEADING).addGroup(layout
+								.createSequentialGroup().addContainerGap()
+								.addGroup(layout.createParallelGroup(Alignment.TRAILING)
 										.addGroup(layout.createSequentialGroup().addComponent(getPinsButton)
 												.addPreferredGap(ComponentPlacement.RELATED).addComponent(getInfoButton)
 												.addPreferredGap(ComponentPlacement.RELATED)
 												.addComponent(
-														clearButton, GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+														clearButton, GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
 												.addPreferredGap(ComponentPlacement.UNRELATED))
 										.addGroup(
-												layout.createSequentialGroup().addGap(0, 17, Short.MAX_VALUE)
+												layout.createSequentialGroup().addGap(0, 22, Short.MAX_VALUE)
 														.addGroup(layout.createParallelGroup(Alignment.LEADING)
 																.addComponent(jLabel18, Alignment.TRAILING)
 																.addComponent(jLabel16).addComponent(jLabel17))
@@ -258,18 +386,18 @@ public class Client extends javax.swing.JFrame {
 										.createParallelGroup(Alignment.LEADING)
 										.addGroup(layout.createSequentialGroup().addGap(51).addComponent(jLabel9)
 												.addGap(72).addComponent(jLabel4))
-										.addGroup(layout.createSequentialGroup().addContainerGap()
-												.addComponent(jLabel14).addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(textField, GroupLayout.PREFERRED_SIZE,
-														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-												.addGap(80).addComponent(postButton, GroupLayout.PREFERRED_SIZE, 83,
-														GroupLayout.PREFERRED_SIZE))
-										.addGroup(layout.createSequentialGroup().addGap(43).addComponent(jLabel8)
-												.addGap(170).addComponent(jLabel15)))
-										.addGap(0, 69, Short.MAX_VALUE)))
+										.addGroup(layout.createSequentialGroup().addContainerGap().addGroup(layout
+												.createParallelGroup(Alignment.TRAILING).addComponent(jLabel15)
+												.addGroup(layout.createSequentialGroup().addComponent(jLabel14)
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(textField, GroupLayout.PREFERRED_SIZE,
+																GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+														.addGap(80).addComponent(postButton, GroupLayout.PREFERRED_SIZE,
+																83, GroupLayout.PREFERRED_SIZE)))))
+										.addGap(27, 96, Short.MAX_VALUE)))
 						.addContainerGap())
-				.addGroup(layout.createSequentialGroup()
-						.addGroup(layout.createParallelGroup(Alignment.LEADING)
+				.addGroup(
+						layout.createSequentialGroup()
 								.addGroup(layout.createParallelGroup(Alignment.LEADING)
 										.addGroup(layout.createSequentialGroup().addGap(58).addComponent(jLabel3))
 										.addGroup(layout.createSequentialGroup().addContainerGap()
@@ -284,47 +412,51 @@ public class Client extends javax.swing.JFrame {
 												.addComponent(connectButton, GroupLayout.PREFERRED_SIZE, 89,
 														GroupLayout.PREFERRED_SIZE)
 												.addPreferredGap(ComponentPlacement.UNRELATED)
-												.addComponent(disconnectButton)))
-								.addGroup(layout.createSequentialGroup().addContainerGap().addComponent(jScrollPane2,
-										GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE)))
-						.addGap(20)
-						.addGroup(layout.createParallelGroup(Alignment.TRAILING).addGroup(layout.createSequentialGroup()
-								.addGap(8)
-								.addGroup(layout.createParallelGroup(Alignment.LEADING).addComponent(jLabel10)
-										.addComponent(jLabel11).addComponent(jLabel12).addComponent(jLabel13))
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addGroup(layout.createParallelGroup(Alignment.LEADING)
-										.addComponent(postXCoordinate, GroupLayout.PREFERRED_SIZE, 80,
-												GroupLayout.PREFERRED_SIZE)
-										.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
-												.addComponent(width, Alignment.LEADING)
-												.addComponent(height, Alignment.LEADING).addComponent(postYCoordinate,
-														Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 80,
-														GroupLayout.PREFERRED_SIZE)))
-								.addGap(0, 53, Short.MAX_VALUE))
-								.addGroup(layout.createSequentialGroup()
-										.addPreferredGap(ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
-										.addGroup(layout.createParallelGroup(Alignment.TRAILING)
-												.addGroup(
-														layout.createSequentialGroup().addComponent(jLabel5).addGap(73))
-												.addGroup(layout.createSequentialGroup()
-														.addGroup(layout.createParallelGroup(Alignment.LEADING)
-																.addComponent(jLabel6).addComponent(jLabel7))
-														.addPreferredGap(ComponentPlacement.RELATED)
-														.addGroup(layout.createParallelGroup(Alignment.LEADING)
-																.addComponent(pinXCoordinate,
-																		GroupLayout.PREFERRED_SIZE, 80,
-																		GroupLayout.PREFERRED_SIZE)
-																.addComponent(pinYCoordinate,
+												.addComponent(disconnectButton))
+										.addGroup(layout.createSequentialGroup().addContainerGap()
+												.addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+								.addGap(20)
+								.addGroup(layout.createParallelGroup(
+										Alignment.TRAILING)
+										.addGroup(layout.createSequentialGroup().addGap(8).addGroup(layout
+												.createParallelGroup(Alignment.LEADING).addComponent(jLabel10)
+												.addComponent(jLabel11).addComponent(jLabel12).addComponent(jLabel13))
+												.addPreferredGap(ComponentPlacement.RELATED)
+												.addGroup(layout.createParallelGroup(Alignment.LEADING)
+														.addComponent(postXCoordinate, GroupLayout.PREFERRED_SIZE, 80,
+																GroupLayout.PREFERRED_SIZE)
+														.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+																.addComponent(width, Alignment.LEADING).addComponent(
+																		height, Alignment.LEADING)
+																.addComponent(postYCoordinate, Alignment.LEADING,
 																		GroupLayout.PREFERRED_SIZE, 80,
 																		GroupLayout.PREFERRED_SIZE)))
-												.addGroup(layout.createSequentialGroup()
-														.addComponent(pinButton, GroupLayout.PREFERRED_SIZE, 57,
-																GroupLayout.PREFERRED_SIZE)
-														.addPreferredGap(ComponentPlacement.UNRELATED)
-														.addComponent(unpinButton)))
-										.addGap(29)))));
+												.addGap(0, 58, Short.MAX_VALUE))
+										.addGroup(layout.createSequentialGroup()
+												.addPreferredGap(ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
+												.addGroup(layout.createParallelGroup(Alignment.TRAILING)
+														.addGroup(layout.createSequentialGroup().addComponent(jLabel5)
+																.addGap(73))
+														.addGroup(layout.createSequentialGroup()
+																.addGroup(layout.createParallelGroup(Alignment.LEADING)
+																		.addComponent(jLabel6).addComponent(jLabel7))
+																.addPreferredGap(ComponentPlacement.RELATED)
+																.addGroup(layout.createParallelGroup(Alignment.LEADING)
+																		.addComponent(pinXCoordinate,
+																				GroupLayout.PREFERRED_SIZE, 80,
+																				GroupLayout.PREFERRED_SIZE)
+																		.addComponent(pinYCoordinate,
+																				GroupLayout.PREFERRED_SIZE, 80,
+																				GroupLayout.PREFERRED_SIZE)))
+														.addGroup(layout.createSequentialGroup()
+																.addComponent(pinButton, GroupLayout.PREFERRED_SIZE, 57,
+																		GroupLayout.PREFERRED_SIZE)
+																.addPreferredGap(ComponentPlacement.UNRELATED)
+																.addComponent(unpinButton)))
+												.addGap(29))))
+				.addGroup(layout.createSequentialGroup().addGap(49).addComponent(jLabel8).addContainerGap(282,
+						Short.MAX_VALUE)));
 		layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING).addGroup(layout.createSequentialGroup()
 				.addContainerGap()
 				.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(jLabel3).addComponent(jLabel5))
@@ -382,7 +514,7 @@ public class Client extends javax.swing.JFrame {
 						.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 								GroupLayout.PREFERRED_SIZE))
 				.addGap(15)
-				.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(jLabel15).addComponent(jLabel8))
+				.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(jLabel8).addComponent(jLabel15))
 				.addPreferredGap(ComponentPlacement.UNRELATED)
 				.addGroup(layout.createParallelGroup(Alignment.LEADING)
 						.addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
@@ -423,8 +555,7 @@ public class Client extends javax.swing.JFrame {
 			socket = new Socket(serverAddress, Integer.parseInt(port));
 			isConnected = socket.isConnected();
 			if (isConnected) {
-				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				output.setText(in.readLine());
+				output.setText("You are connected to the server.");
 			}
 		} else {
 			output.setText("You have already connected to the \nserver.");
@@ -432,9 +563,12 @@ public class Client extends javax.swing.JFrame {
 	}
 
 	private void postYCoordinateAction(java.awt.event.ActionEvent evt) {
+		// TODO add your handling code here:
+	}// GEN-LAST:event_jTextField5ActionPerformed
 
-	}
-
+	/**
+	 * @param args the command line arguments
+	 */
 	public static void main(String args[]) {
 		try {
 			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -515,6 +649,7 @@ public class Client extends javax.swing.JFrame {
 	private final Action action = new SwingAction();
 	private JTextField textField;
 
+	// End of variables declaration//GEN-END:variables
 	private class SwingAction extends AbstractAction {
 		public SwingAction() {
 			putValue(NAME, "SwingAction");
