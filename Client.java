@@ -3,7 +3,9 @@ package cp372_a1;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -46,10 +48,10 @@ public class Client extends javax.swing.JFrame {
 				if (postXCoordinate.getText().equals("") || postXCoordinate.getText().equals("")
 						|| height.getText().equals("") || width.getText().equals("")) {
 					// UPDATE DOC TO SAY WHAT FIELDS ARE MANDATORY TO POST A NOTE
-					output.setText("Please fill in all mandatory fields to post a note");
+					output.setText("Please fill in all mandatory fields\n to post a note");
 				} else if (!isInteger(postXCoordinate.getText()) || !isInteger(postYCoordinate.getText())
 						|| !isInteger(height.getText()) || !isInteger(width.getText())) {
-					output.setText("Please enter an integers in the coordinate and dimension text fields.");
+					output.setText("Please enter an integers in the\n coordinate and dimension text fields.");
 				} else {
 					// send post to the server for processing
 					try {
@@ -210,9 +212,22 @@ public class Client extends javax.swing.JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					String message = "clear";
 					out.println(message);
-
+					// to test if string has content or not
+					String temp = in.readLine();
+					// if string does not have content
+					if (temp.equals("0")) {
+						output.setText("No notes are on the board.");
+						// if string has content
+					} else {
+						String[] removed = temp.split("@@");
+						output.setText("");
+						for (int i = 0; i < removed.length; i++) {
+							output.append(removed[i] + "\n");
+						}
+					}
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
