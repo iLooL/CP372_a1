@@ -135,9 +135,9 @@ public class Client extends javax.swing.JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else if (!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else {
 					// send it to the server and process
 					try {
@@ -231,8 +231,11 @@ public class Client extends javax.swing.JFrame {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out.println(message);
-					output.setText(in.readLine());
-
+					String[] temp = in.readLine().split("@@");
+					output.setText("");
+					for (int i = 0; i < temp.length; i++) {
+						out.append(temp[i] + "\n");
+					}
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -577,8 +580,8 @@ public class Client extends javax.swing.JFrame {
 	}
 
 	private void postYCoordinateAction(java.awt.event.ActionEvent evt) {
-		// TODO add your handling code here:
-	}// GEN-LAST:event_jTextField5ActionPerformed
+
+	}
 
 	/**
 	 * @param args the command line arguments
@@ -663,7 +666,6 @@ public class Client extends javax.swing.JFrame {
 	private final Action action = new SwingAction();
 	private JTextField textField;
 
-	// End of variables declaration//GEN-END:variables
 	private class SwingAction extends AbstractAction {
 		public SwingAction() {
 			putValue(NAME, "SwingAction");
