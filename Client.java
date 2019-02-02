@@ -212,30 +212,36 @@ public class Client extends javax.swing.JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String message = "get@@";
+				String message2 = "";
+				String message3 = "";
+				String message4 = "";
+				String code = "";
 				// add the proper get information
 				// we have many if statements to reduce whitespace for more easier parsing
 				if (!getColour.getText().equals("")) {
-					message = message + "c" + getColour.getText() + "@@";
+					message2 = getColour.getText() + "@@";
+					code = code + "c";
 				}
 
 				if (!getContains.getText().equals("")) {
-					message = message + "d" + getContains.getText() + "@@";
+					message3 = getContains.getText() + "@@";
+					code = code + "d";
 				}
 
 				if (!getRefersTo.getText().equals("")) {
-					message = message + "r" + getRefersTo.getText();
+					message4 = getRefersTo.getText();
+					code = code + "r";
 				}
+
+				message = message + code + "@@" + message2 + message3 + message4;
 
 				// send the get message to the server
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out.println(message);
-					String[] temp = in.readLine().split("@@");
-					output.setText("");
-					for (int i = 0; i < temp.length; i++) {
-						out.append(temp[i] + "\n");
-					}
+					output.setText(in.readLine());
+
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
