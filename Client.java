@@ -48,10 +48,12 @@ public class Client extends javax.swing.JFrame {
 				if (postXCoordinate.getText().equals("") || postYCoordinate.getText().equals("")
 						|| height.getText().equals("") || width.getText().equals("")) {
 					// UPDATE DOC TO SAY WHAT FIELDS ARE MANDATORY TO POST A NOTE
-					output.setText("Please fill in all mandatory fields to post a note.");
+					output.setText("Please fill in all mandatory fields \nto post a note.");
 				} else if (!isInteger(postXCoordinate.getText()) || !isInteger(postYCoordinate.getText())
 						|| !isInteger(height.getText()) || !isInteger(width.getText())) {
-					output.setText("Please enter an integers in the coordinate and dimension text fields.");
+					output.setText("Please enter an integers in the \ncoordinate and dimension text fields.");
+				} else if (contentTextArea.getText().contains("@@")) {
+					output.setText("Please Stop Trying to Break The Code.");
 				} else {
 					// send post to the server for processing
 					try {
@@ -94,9 +96,9 @@ public class Client extends javax.swing.JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else if (!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else {
 					// send it to the server and process
 					try {
@@ -250,7 +252,7 @@ public class Client extends javax.swing.JFrame {
 					String temp = in.readLine();
 					// if string does not have content
 					if (temp.equals("")) {
-						output.setText("No notes are on the board.");
+						output.setText("No notes were removed from the board.");
 						// if string has content
 					} else {
 						String[] removed = temp.split("@@");
