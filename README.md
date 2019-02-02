@@ -16,3 +16,7 @@ ERRORS
 TODO
 
 -fix the PDF by adding test cases (ask the prof for details)
+
+-clear removes notes with pins
+
+-get pinns is bad
