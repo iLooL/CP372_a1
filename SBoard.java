@@ -102,14 +102,10 @@ public class SBoard {
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 
                 while (true) {
-                	// THE CODE BELOW CURRENTLY DOES NOT SEND BACK TO CLIENT
                     String input = in.readLine();
-                    System.out.println(input);
-                    String[] parsed = input.split(" ");
+                    System.out.println("Server gets: " + input);
+                    String[] parsed = input.split("@@");
                     
-                    // I think this is all of the button functionality
-                    // double check if it is and delete this comment once you have
-                    // add stuff to the board by: board.[method]
                     if(parsed[0].equals("pin")) {
                     	int x = Integer.parseInt(parsed[1]);
                     	int y = Integer.parseInt(parsed[2]);
@@ -121,7 +117,6 @@ public class SBoard {
                         	out.println("Pin " + x +" "+ y + " successful.");
                     	}
                     	else {
-                    		// send client error message that requested pin is off the board bounds
                     		out.println("Pin out of board boundaries.");
                     	}                    	
                     }
@@ -151,33 +146,132 @@ public class SBoard {
 							out.println("Please stay within board boundaries.");
 						} else {
 							createPost(parsed);
-							out.println("Note created successfully");
+							out.println("Note created successfully.");
 						}
 
                     	
                     }
                     else if(parsed[0].equals("getPins")) {
-                    	// use this for debugging
                     	for(int i = 0; i < board.pins.size(); i++) {
                     		System.out.println("x: "+ board.pins.get(i).x + " y: " + board.pins.get(i).y);
                     	}
                     }
                     else if(parsed[0].equals("get")) {
-                    	String message = "Notes return based upon input: \n\n";
+                    	String message = "Notes return based upon input:@@";
+                    	// print out all the notes, nothing is entered in the other 
+                    	// get parameters so we return everything
                     	if(parsed.length == 1) {
-                    		// print out all the notes
                     		int size = board.notes.size();
                     		for(int i = 0; i < size; i++) {
-                    			System.out.println("fuck");
-                    			message = message + "Note " + i + 1 + ": \n";
-                    			message = message + "Colour - " + board.notes.get(i).colour;
-                    			message = message + "Content - " + board.notes.get(i).content;
-                    			message = message + "\n";
-                    			System.out.println("fuck3");
+                    			int f = i + 1;
+                    			message = message + "Note " + f + "@@";
+                    			message = message + "Colour - " + board.notes.get(i).colour + "@@";
+                    			message = message + "Content - " + board.notes.get(i).content + "@@";
+                    		}
+                    	}
+                    	// fetch only content
+                    	else if(parsed[1].equals("c")) {
+                    		for(int i = 0; i < board.notes.size(); i++) {
+                    			boolean isGood = getColour(parsed[2], board.notes.get(i).colour);
+                    			if(isGood) {
+                    				int f = i + 1;
+                        			message = message + "Note " + f + "@@";
+                        			message = message + "Colour - " + board.notes.get(i).colour + "@@";
+                        			message = message + "Content - " + board.notes.get(i).content + "@@";
+                    			}
+                    		}
+                    	}
+                    	// fetch only data
+                    	else if(parsed[1].equals("d")) {                   		
+                    		for(int i = 0; i < board.notes.size(); i++) {
+                    			boolean isGood = getData(parsed[2], board.notes.get(i));
+                    			if(isGood) {
+                    				int f = i + 1;
+                        			message = message + "Note " + f + "@@";
+                        			message = message + "Colour - " + board.notes.get(i).colour + "@@";
+                        			message = message + "Content - " + board.notes.get(i).content + "@@";
+                    			}
+                    		}                    		
+                    	}
+                    	// fetch only refersTo
+                    	else if(parsed[1].equals("r")) {
+                    		for(int i = 0; i < board.notes.size(); i++) {
+                    			boolean isGood = getContains(board.notes.get(i).content, parsed[2]);
+                    			if(isGood) {
+                    				int f = i + 1;
+                        			message = message + "Note " + f + "@@";
+                        			message = message + "Colour - " + board.notes.get(i).colour + "@@";
+                        			message = message + "Content - " + board.notes.get(i).content + "@@";
+                    			}
+                    		}
+                    	}
+                    	// fetch content and data
+                    	else if(parsed[1].equals("cd")) {
+                    		for(int i = 0; i < board.notes.size(); i++) {
+                    			boolean isGood = getColour(parsed[2], board.notes.get(i).colour);
+                    			if(isGood) {
+                    				boolean isStill = getData(parsed[3], board.notes.get(i));
+                        			if(isStill) {
+                        				int f = i + 1;
+                            			message = message + "Note " + f + "@@";
+                            			message = message + "Colour - " + board.notes.get(i).colour + "@@";
+                            			message = message + "Content - " + board.notes.get(i).content + "@@";
+                        			}
+                    			}
+                    		}
+                    	}
+                    	// fetch content and refersTo
+                    	else if(parsed[1].equals("cr")) {
+                    		for(int i = 0; i < board.notes.size(); i++) {
+                    			boolean isGood = getColour(parsed[2], board.notes.get(i).colour);
+                    			if(isGood) {
+                    				boolean isStill = getContains(board.notes.get(i).content, parsed[3]);
+                        			if(isStill) {
+                        				int f = i + 1;
+                            			message = message + "Note " + f + "@@";
+                            			message = message + "Colour - " + board.notes.get(i).colour + "@@";
+                            			message = message + "Content - " + board.notes.get(i).content + "@@";
+                        			}
+                    			}
+                    		}
+                    	}
+                    	// fetch data and refersTo
+                    	else if(parsed[1].equals("dr")) {
+                    		for(int i = 0; i < board.notes.size(); i++) {
+                    			boolean isGood = getData(parsed[2], board.notes.get(i));
+                    			if(isGood) {
+                    				boolean isStill = getContains(board.notes.get(i).content, parsed[3]);
+                        			if(isStill) {
+                        				int f = i + 1;
+                            			message = message + "Note " + f + "@@";
+                            			message = message + "Colour - " + board.notes.get(i).colour + "@@";
+                            			message = message + "Content - " + board.notes.get(i).content + "@@";
+                        			}
+                    			}
+                    		}      
+                    		
+                    	}
+                    	// fetch everything relating to the content, data and refersTo
+                    	else if(parsed[1].equals("cdr")) {
+                    		for(int i = 0; i < board.notes.size(); i++) {
+                    			boolean isGood = getColour(parsed[2], board.notes.get(i).colour);
+                    			if(isGood) {
+                    				boolean isStill = getData(parsed[3], board.notes.get(i));
+                        			if(isStill) {
+                        				boolean isStillGood = getContains(board.notes.get(i).content, parsed[4]);
+                            			if(isStillGood) {
+                            				int f = i + 1;
+                                			message = message + "Note " + f + "@@";
+                                			message = message + "Colour - " + board.notes.get(i).colour + "@@";
+                                			message = message + "Content - " + board.notes.get(i).content + "@@";
+                            			}
+                        			}
+                    			}
                     		}
                     		
-                    		out.println(message);
                     	}
+                    	
+                    	out.println(message);
                     	
                     }
                     else if(parsed[0].equals("clear")) {
@@ -198,14 +292,57 @@ public class SBoard {
             }
         }
         
+        private boolean getColour(String parsed, String colour) {
+        	if(checkColour(parsed)) {
+				// if the note matches the colour the add it to the string
+				if(colour.equals(parsed)) {
+					return true;
+    			}
+        	}
+        	return false;
+       }
+        
+       private boolean getContains(String parsed, String sub) {
+    	   if(sub.equals(parsed)) {
+    		   return true;
+    	   }
+    	   else {
+    		   return false;
+    	   }
+       }
+        
+       private boolean getData(String parsed, Note note) {
+    	   	String[] data = parsed.split(" ");
+	   		if(data.length != 2) {                  			
+	   			return false;
+	   		}
+	   		else {
+	       		if(!isInteger(data[0]) || !isInteger(data[1])) {
+	       			return false;
+	       		}
+	       		// proper input
+	       		else {
+	       			int x = Integer.parseInt(data[0]);
+	       			int y = Integer.parseInt(data[1]);
+       				if(note.point.x <= x && note.point.x + note.width >= x) {
+               			if(note.point.y <= y && note.point.y + note.height >= y) {
+               				return true;	                           
+               			}
+               		}
+	       			
+	       		}	                    		
+	   		}  
+	   		return false;
+       }
+        
         
         private String clear(ArrayList<Note> notes) {
-        	// add to the removed string "Notes cleared: \n"
-			String removed = "";
+        	String removed = "";
 			if (notes.size() == 0) {
 				removed = "0";
 			} else {
-				for (int i = 0; i < notes.size(); i++) {
+				int size = notes.size();
+				for (int i = size - 1; i >= 0; i--) {
 					if (notes.get(i).isPinned == false) {
 						removed = removed + notes.get(i).content + "@@";
 						board.notes.remove(i);
@@ -259,13 +396,12 @@ public class SBoard {
         // updates notes when a new pin has been added to the board
         private void updateNotes(Pin pin, ArrayList<Note> notes) {
         	int noteSize = notes.size();
-        	for(int i = 0; i < noteSize; i++) {
-        		if(notes.get(i).point.x >= pin.x &&
-        		   notes.get(i).point.x + width <= pin.x &&
-        		   notes.get(i).point.y >= pin.y &&
-        		   notes.get(i).point.y + height <= pin.y) {
-        			notes.get(i).isPinned = true;
-        			notes.get(i).points.add(pin);
+        	for(int i = 0; i < noteSize; i++) {        		
+        		if(notes.get(i).point.x <= pin.x && notes.get(i).point.x + notes.get(i).width >= pin.x) {
+        			if(notes.get(i).point.y <= pin.y && notes.get(i).point.y + notes.get(i).height >= pin.y) {
+        				notes.get(i).isPinned = true;
+            			notes.get(i).points.add(pin);
+        			}
         		}
         	}
         }
@@ -289,6 +425,15 @@ public class SBoard {
 					Integer.parseInt(values[4]), Integer.parseInt(values[3]));
 			board.notes.add(newNote);
 		}
+        
+        public boolean isInteger(String num) {
+    		try {
+    			Integer.parseInt(num);
+    			return true;
+    		} catch (Exception e) {
+    			return false;
+    		}
+    	}
         
     }
 }
