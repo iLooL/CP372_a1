@@ -182,9 +182,9 @@ public class Client extends javax.swing.JFrame {
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-					String message = "getPins";
+					String message = "getPins@@gg";
 					out.println(message);
-					output.setText(in.readLine());
+					//output.setText(in.readLine());
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
