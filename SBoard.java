@@ -104,12 +104,8 @@ public class SBoard {
                 while (true) {
                 	// THE CODE BELOW CURRENTLY DOES NOT SEND BACK TO CLIENT
                     String input = in.readLine();
-                    System.out.println(input);
+                    System.out.println("Server gets: " + input);
                     String[] parsed = input.split("@@");
-                    for(int i = 0; i < parsed.length; i++) {
-                    	System.out.println(parsed[i]);
-                    }
-                    
                     
                     // I think this is all of the button functionality
                     // double check if it is and delete this comment once you have
@@ -161,7 +157,6 @@ public class SBoard {
                     	
                     }
                     else if(parsed[0].equals("getPins")) {
-                    	// use this for debugging
                     	for(int i = 0; i < board.pins.size(); i++) {
                     		System.out.println("x: "+ board.pins.get(i).x + " y: " + board.pins.get(i).y);
                     	}
@@ -172,12 +167,10 @@ public class SBoard {
                     		// print out all the notes
                     		int size = board.notes.size();
                     		for(int i = 0; i < size; i++) {
-                    			System.out.println("fuck");
                     			message = message + "Note " + i + 1 + ": \n";
                     			message = message + "Colour - " + board.notes.get(i).colour;
                     			message = message + "Content - " + board.notes.get(i).content;
                     			message = message + "\n";
-                    			System.out.println("fuck3");
                     		}
                     		
                     		out.println(message);
@@ -264,12 +257,22 @@ public class SBoard {
         private void updateNotes(Pin pin, ArrayList<Note> notes) {
         	int noteSize = notes.size();
         	for(int i = 0; i < noteSize; i++) {
-        		if(notes.get(i).point.x >= pin.x &&
-        		   notes.get(i).point.x + width <= pin.x &&
-        		   notes.get(i).point.y >= pin.y &&
-        		   notes.get(i).point.y + height <= pin.y) {
-        			notes.get(i).isPinned = true;
-        			notes.get(i).points.add(pin);
+//        		int f = notes.get(i).point.x + notes.get(i).width;
+//        		int g = notes.get(i).point.y + notes.get(i).height;
+//        		System.out.println("notes.get(i).point.x: " + notes.get(i).point.x);
+//        		System.out.println("pin.x: " + pin.x);
+//        		System.out.println("notes.get(i).point.x + notes.get(i).width: " + f);
+//        		
+//        		System.out.println("notes.get(i).point.y: " + notes.get(i).point.y);
+//        		System.out.println("pin.y: " + pin.y);
+//        		System.out.println("notes.get(i).point.y + notes.get(i).height: " + g + "\n");
+        		
+        		// this if statement should be getting initialized but isnt
+        		if(notes.get(i).point.x <= pin.x && notes.get(i).point.x + notes.get(i).width >= pin.x) {
+        			if(notes.get(i).point.y <= pin.y && notes.get(i).point.y + notes.get(i).height >= pin.y) {
+        				notes.get(i).isPinned = true;
+            			notes.get(i).points.add(pin);
+        			}
         		}
         	}
         }
