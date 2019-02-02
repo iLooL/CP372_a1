@@ -56,7 +56,6 @@ public class Client extends javax.swing.JFrame {
 					// send post to the server for processing
 					try {
 						// ADD THE PROPER CODE TO PUT COLOUR INTO THIS STRING
-						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						String colour, content;
 						if (textField.getText().equals("")) {
 							colour = "default";
@@ -70,6 +69,7 @@ public class Client extends javax.swing.JFrame {
 						}
 
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						String post = "post@@" + postXCoordinate.getText() + "@@" + postYCoordinate.getText() + "@@"
 								+ height.getText() + "@@" + width.getText() + "@@" + content + "@@" + colour;
 						out.println(post);
@@ -102,7 +102,7 @@ public class Client extends javax.swing.JFrame {
 					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-						String pin = "pin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						String pin = "pin@@" + pinXCoordinate.getText() + "@@" + pinYCoordinate.getText();
 						out.println(pin);
 						output.setText(in.readLine());
 
@@ -141,7 +141,7 @@ public class Client extends javax.swing.JFrame {
 					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-						String pin = "unpin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						String pin = "unpin@@" + pinXCoordinate.getText() + "@@" + pinYCoordinate.getText();
 						out.println(pin);
 						output.setText(in.readLine());
 
@@ -179,8 +179,19 @@ public class Client extends javax.swing.JFrame {
 				// and it sends back a string of pins
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-					String message = "getPins";
+					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					String message = "getPins@@gg";
 					out.println(message);
+					String temp = in.readLine();
+					if (temp.equals("")) {
+						output.setText("No pins are on the board.");
+					} else {
+						String[] removed = temp.split(",");
+						output.setText("Pins on the board:\n");
+						for (int i = 0; i < removed.length; i++) {
+							output.append(removed[i] + "\n");
+						}
+					}
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -198,25 +209,27 @@ public class Client extends javax.swing.JFrame {
 		getInfoButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String message = "get ";
+				String message = "get@@";
 				// add the proper get information
 				// we have many if statements to reduce whitespace for more easier parsing
 				if (!getColour.getText().equals("")) {
-					message = message + "c" + getColour.getText() + " ";
+					message = message + "c" + getColour.getText() + "@@";
 				}
 
 				if (!getContains.getText().equals("")) {
-					message = message + "d" + getContains.getText() + " ";
+					message = message + "d" + getContains.getText() + "@@";
 				}
 
 				if (!getRefersTo.getText().equals("")) {
-					message = message + "r" + getRefersTo.getText() + " ";
+					message = message + "r" + getRefersTo.getText();
 				}
 
 				// send the get message to the server
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out.println(message);
+					output.setText(in.readLine());
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -236,12 +249,12 @@ public class Client extends javax.swing.JFrame {
 					// to test if string has content or not
 					String temp = in.readLine();
 					// if string does not have content
-					if (temp.equals("0")) {
+					if (temp.equals("")) {
 						output.setText("No notes are on the board.");
 						// if string has content
 					} else {
 						String[] removed = temp.split("@@");
-						output.setText("");
+						output.setText("Notes that were removed:\n");
 						for (int i = 0; i < removed.length; i++) {
 							output.append(removed[i] + "\n");
 						}
