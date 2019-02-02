@@ -45,7 +45,7 @@ public class Client extends javax.swing.JFrame {
 		postButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (postXCoordinate.getText().equals("") || postXCoordinate.getText().equals("")
+				if (postXCoordinate.getText().equals("") || postYCoordinate.getText().equals("")
 						|| height.getText().equals("") || width.getText().equals("")) {
 					// UPDATE DOC TO SAY WHAT FIELDS ARE MANDATORY TO POST A NOTE
 					output.setText("Please fill in all mandatory fields to post a note.");
@@ -71,10 +71,11 @@ public class Client extends javax.swing.JFrame {
 						}
 						
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-						String post = "post " + postXCoordinate.getText() + " " + postXCoordinate.getText() + " "
-								+ height.getText() + " " + width.getText() + " " + content
-								+ " " + colour;
+						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+						String post = "post@@" + postXCoordinate.getText() + "@@" + postYCoordinate.getText() + "@@"
+								+ height.getText() + "@@" + width.getText() + "@@" + content + "@@" + colour;
 						out.println(post);
+						output.setText(in.readLine());
 
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -103,7 +104,7 @@ public class Client extends javax.swing.JFrame {
 					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-						String pin = "pin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						String pin = "pin@@" + pinXCoordinate.getText() + "@@" + pinYCoordinate.getText();
 						out.println(pin);
 						output.setText(in.readLine());
 
@@ -142,7 +143,7 @@ public class Client extends javax.swing.JFrame {
 					try {
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-						String pin = "unpin " + pinXCoordinate.getText() + " " + pinYCoordinate.getText();
+						String pin = "unpin@@" + pinXCoordinate.getText() + "@@" + pinYCoordinate.getText();
 						out.println(pin);
 						output.setText(in.readLine());
 
@@ -180,8 +181,10 @@ public class Client extends javax.swing.JFrame {
 				// and it sends back a string of pins
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-					String message = "getPins";
+					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					String message = "getPins@@gg";
 					out.println(message);
+					//output.setText(in.readLine());
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -199,25 +202,36 @@ public class Client extends javax.swing.JFrame {
 		getInfoButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String message = "get ";
+				String message = "get@@";
+				String message2 = "";
+				String message3 = "";
+				String message4 = "";
+				String code = "";
 				// add the proper get information
 				// we have many if statements to reduce whitespace for more easier parsing
 				if (!getColour.getText().equals("")) {
-					message = message + "c" + getColour.getText() + " ";
+					message2 = getColour.getText() + "@@";
+					code = code + "c";
 				}
 
 				if (!getContains.getText().equals("")) {
-					message = message + "d" + getContains.getText() + " ";
+					message3 = getContains.getText() + "@@";
+					code = code + "d";
 				}
 
 				if (!getRefersTo.getText().equals("")) {
-					message = message + "r" + getRefersTo.getText() + " ";
+					message4 = getRefersTo.getText();
+					code = code + "r";
 				}
+				
+				message = message + code + "@@" + message2 + message3 + message4;
 
-				// send the get message to the server
+				// send the get message to the server	
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out.println(message);
+					output.setText(in.readLine());
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -231,9 +245,22 @@ public class Client extends javax.swing.JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					String message = "clear";
 					out.println(message);
-
+					// to test if string has content or not
+					String temp = in.readLine();
+					// if string does not have content
+					if (temp.equals("0")) {
+						output.setText("No notes are on the board.");
+						// if string has content
+					} else {
+						String[] removed = temp.split("@@");
+						output.setText("");
+						for (int i = 0; i < removed.length; i++) {
+							output.append(removed[i] + "\n");
+						}
+					}
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
