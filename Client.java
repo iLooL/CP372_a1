@@ -48,28 +48,28 @@ public class Client extends javax.swing.JFrame {
 				if (postXCoordinate.getText().equals("") || postYCoordinate.getText().equals("")
 						|| height.getText().equals("") || width.getText().equals("")) {
 					// UPDATE DOC TO SAY WHAT FIELDS ARE MANDATORY TO POST A NOTE
-					output.setText("Please fill in all mandatory fields to post a note.");
+					output.setText("Please fill in all mandatory fields \nto post a note.");
 				} else if (!isInteger(postXCoordinate.getText()) || !isInteger(postYCoordinate.getText())
 						|| !isInteger(height.getText()) || !isInteger(width.getText())) {
-					output.setText("Please enter an integers in the coordinate and dimension text fields.");
+					output.setText("Please enter an integers in the \ncoordinate and dimension text fields.");
+				} else if (contentTextArea.getText().contains("@@")) {
+					output.setText("Please Stop Trying to Break The Code.");
 				} else {
 					// send post to the server for processing
 					try {
 						// ADD THE PROPER CODE TO PUT COLOUR INTO THIS STRING
 						String colour, content;
-						if(textField.getText().equals("")) {
+						if (textField.getText().equals("")) {
 							colour = "default";
-						}
-						else {
+						} else {
 							colour = textField.getText();
 						}
-						if(contentTextArea.getText().equals("")) {
+						if (contentTextArea.getText().equals("")) {
 							content = "empty";
-						}
-						else {
+						} else {
 							content = contentTextArea.getText();
 						}
-						
+
 						PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						String post = "post@@" + postXCoordinate.getText() + "@@" + postYCoordinate.getText() + "@@"
@@ -96,9 +96,9 @@ public class Client extends javax.swing.JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else if (!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else {
 					// send it to the server and process
 					try {
@@ -135,9 +135,9 @@ public class Client extends javax.swing.JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else if (!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else {
 					// send it to the server and process
 					try {
@@ -184,7 +184,16 @@ public class Client extends javax.swing.JFrame {
 					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					String message = "getPins@@gg";
 					out.println(message);
-					//output.setText(in.readLine());
+					String temp = in.readLine();
+					if (temp.equals("")) {
+						output.setText("No pins are on the board.");
+					} else {
+						String[] removed = temp.split(",");
+						output.setText("Pins on the board:\n");
+						for (int i = 0; i < removed.length; i++) {
+							output.append(removed[i] + "\n");
+						}
+					}
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -223,15 +232,24 @@ public class Client extends javax.swing.JFrame {
 					message4 = getRefersTo.getText();
 					code = code + "r";
 				}
-				
+
 				message = message + code + "@@" + message2 + message3 + message4;
 
-				// send the get message to the server	
+				// send the get message to the server
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out.println(message);
-					output.setText(in.readLine());
+					//output.setText(in.readLine());
+					String temp = in.readLine();
+					if (temp.equals("")) {
+						output.setText("No pins are on the board.");
+					} else {
+						String[] removed = temp.split("@@");
+						for (int i = 0; i < removed.length; i++) {
+							output.append(removed[i] + "\n");
+						}
+					}
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -251,12 +269,12 @@ public class Client extends javax.swing.JFrame {
 					// to test if string has content or not
 					String temp = in.readLine();
 					// if string does not have content
-					if (temp.equals("0")) {
-						output.setText("No notes are on the board.");
+					if (temp.equals("")) {
+						output.setText("No notes were removed from the board.");
 						// if string has content
 					} else {
 						String[] removed = temp.split("@@");
-						output.setText("");
+						output.setText("Notes that were removed:\n");
 						for (int i = 0; i < removed.length; i++) {
 							output.append(removed[i] + "\n");
 						}
@@ -577,8 +595,8 @@ public class Client extends javax.swing.JFrame {
 	}
 
 	private void postYCoordinateAction(java.awt.event.ActionEvent evt) {
-		// TODO add your handling code here:
-	}// GEN-LAST:event_jTextField5ActionPerformed
+
+	}
 
 	/**
 	 * @param args the command line arguments
@@ -663,7 +681,6 @@ public class Client extends javax.swing.JFrame {
 	private final Action action = new SwingAction();
 	private JTextField textField;
 
-	// End of variables declaration//GEN-END:variables
 	private class SwingAction extends AbstractAction {
 		public SwingAction() {
 			putValue(NAME, "SwingAction");
