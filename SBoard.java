@@ -291,17 +291,19 @@ public class SBoard {
 		}
 
 		private String clear(ArrayList<Note> notes) {
-			String removed = "";
+			String message = "";
 			if (notes.size() > 0) {
 				int size = notes.size();
 				for (int i = size - 1; i >= 0; i--) {
 					if (notes.get(i).isPinned == false) {
-						removed = removed + "Note content: " + notes.get(i).content + "@@";
-						board.notes.remove(i);
+						message = message + "Note " + (i + 1) + "@@";
+						message = message + "Colour - " + notes.get(i).colour + "@@";
+						message = message + "Content - " + notes.get(i).content + "@@";
+						notes.remove(i);
 					}
 				}
 			}
-			return removed;
+			return message;
 		}
 
 		private String getPins(ArrayList<Pin> pins) {
@@ -340,7 +342,7 @@ public class SBoard {
 		// updates the notes pin status
 		private void updateUnpin(Pin p, ArrayList<Note> notes) {
 			int size = notes.size();
-			for (int i = 0; i < size; i++) {
+			for (int i = size - 1; i >= 0; i--) {
 				if (notes.get(i).points.get(i).x == p.x && notes.get(i).points.get(i).y == p.y) {
 					notes.get(i).points.remove(i);
 					// if after removing that pin, if there are no
@@ -356,17 +358,6 @@ public class SBoard {
 		private void updateNotes(Pin pin, ArrayList<Note> notes) {
 			int noteSize = notes.size();
 			for (int i = 0; i < noteSize; i++) {
-//        		int f = notes.get(i).point.x + notes.get(i).width;
-//        		int g = notes.get(i).point.y + notes.get(i).height;
-//        		System.out.println("notes.get(i).point.x: " + notes.get(i).point.x);
-//        		System.out.println("pin.x: " + pin.x);
-//        		System.out.println("notes.get(i).point.x + notes.get(i).width: " + f);
-//        		
-//        		System.out.println("notes.get(i).point.y: " + notes.get(i).point.y);
-//        		System.out.println("pin.y: " + pin.y);
-//        		System.out.println("notes.get(i).point.y + notes.get(i).height: " + g + "\n");
-
-				// this if statement should be getting initialized but isnt
 				if (notes.get(i).point.x <= pin.x && notes.get(i).point.x + notes.get(i).width >= pin.x) {
 					if (notes.get(i).point.y <= pin.y && notes.get(i).point.y + notes.get(i).height >= pin.y) {
 						notes.get(i).isPinned = true;
@@ -404,8 +395,8 @@ public class SBoard {
 			return false;
 		}
 
-		private boolean getContains(String parsed, String sub) {
-			if (sub.equals(parsed)) {
+		private boolean getContains(String compareThis, String toThat) {
+			if (compareThis.contains(toThat)) {
 				return true;
 			} else {
 				return false;
