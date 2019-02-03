@@ -107,7 +107,6 @@ public class SBoard {
 				while (true) {
 					// THE CODE BELOW CURRENTLY DOES NOT SEND BACK TO CLIENT
 					String input = in.readLine();
-					System.out.println("Server gets: " + input);
 					String[] parsed = input.split("@@");
 
 					// I think this is all of the button functionality
@@ -277,31 +276,38 @@ public class SBoard {
 					} else if (parsed[0].equals("clear")) {
 						out.println(clear(board.notes));
 					}
+					else {
+						out.println("Bye!");
+					}
 
 				}
 			} catch (IOException e) {
 				// put print error statement
+				System.out.println(e);
 			} finally {
 				try {
 					socket.close();
 				} catch (IOException e) {
-
+					System.out.println(e);
 				}
 			}
 		}
 
 		private String clear(ArrayList<Note> notes) {
-			String removed = "";
+			String message = "";
 			if (notes.size() > 0) {
 				int size = notes.size();
 				for (int i = size - 1; i >= 0; i--) {
 					if (notes.get(i).isPinned == false) {
-						removed = removed + "Note content: " + notes.get(i).content + "@@";
-						board.notes.remove(i);
+						int f = i + 1;
+						message = message + "Note " + f + "@@";
+						message = message + "Colour - " + notes.get(i).colour + "@@";
+						message = message + "Content - " + notes.get(i).content + "@@";
+						notes.remove(i);
 					}
 				}
 			}
-			return removed;
+			return message;
 		}
 
 		private String getPins(ArrayList<Pin> pins) {
@@ -369,7 +375,7 @@ public class SBoard {
 		// we must know this before adding the pin to the board object
 		private boolean isPinOnBoard(Pin pin) {
 			boolean on;
-			if ((pin.x > width || pin.y > height) && (pin.x < 0 || pin.y < 0)) {
+			if (pin.x > width || pin.y > height || pin.x < 0 || pin.y < 0) {
 				on = false;
 			} else {
 				on = true;
