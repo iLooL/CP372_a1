@@ -107,7 +107,6 @@ public class SBoard {
 				while (true) {
 					// THE CODE BELOW CURRENTLY DOES NOT SEND BACK TO CLIENT
 					String input = in.readLine();
-					System.out.println("Server gets: " + input);
 					String[] parsed = input.split("@@");
 
 					// I think this is all of the button functionality
@@ -172,7 +171,6 @@ public class SBoard {
 						// fetch only content
 						else if (parsed[1].equals("c")) {
 							for (int i = 0; i < board.notes.size(); i++) {
-								System.out.println("test");
 								boolean isGood = getColour(parsed[2], board.notes.get(i).colour);
 								if (isGood) {
 									int f = i + 1;
@@ -296,7 +294,8 @@ public class SBoard {
 				int size = notes.size();
 				for (int i = size - 1; i >= 0; i--) {
 					if (notes.get(i).isPinned == false) {
-						message = message + "Note " + (i + 1) + "@@";
+						int f = i + 1;
+						message = message + "Note " + f + "@@";
 						message = message + "Colour - " + notes.get(i).colour + "@@";
 						message = message + "Content - " + notes.get(i).content + "@@";
 						notes.remove(i);
@@ -371,7 +370,7 @@ public class SBoard {
 		// we must know this before adding the pin to the board object
 		private boolean isPinOnBoard(Pin pin) {
 			boolean on;
-			if ((pin.x > width || pin.y > height) && (pin.x < 0 || pin.y < 0)) {
+			if (pin.x > width || pin.y > height || pin.x < 0 || pin.y < 0) {
 				on = false;
 			} else {
 				on = true;
