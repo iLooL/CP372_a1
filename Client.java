@@ -1,4 +1,4 @@
-package cp372_a1;
+package board;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -121,7 +121,7 @@ public class Client extends javax.swing.JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					socket.close();
-					output.setText("Disconnected successfully");
+					output.setText("Disconnected successfully.");
 				} catch (IOException e1) {
 					output.setText("Disconnect failed.");
 				} catch (NullPointerException e2) {
@@ -135,9 +135,9 @@ public class Client extends javax.swing.JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (pinXCoordinate.getText().equals("") || pinYCoordinate.getText().equals("")) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else if (!isInteger(pinXCoordinate.getText()) || !isInteger(pinYCoordinate.getText())) {
-					output.setText("Please enter an integer in both text fields.");
+					output.setText("Please enter an integer in both \ntext fields.");
 				} else {
 					// send it to the server and process
 					try {
@@ -212,26 +212,44 @@ public class Client extends javax.swing.JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String message = "get@@";
+				String message2 = "";
+				String message3 = "";
+				String message4 = "";
+				String code = "";
 				// add the proper get information
 				// we have many if statements to reduce whitespace for more easier parsing
 				if (!getColour.getText().equals("")) {
-					message = message + "c" + getColour.getText() + "@@";
+					message2 = getColour.getText() + "@@";
+					code = code + "c";
 				}
 
 				if (!getContains.getText().equals("")) {
-					message = message + "d" + getContains.getText() + "@@";
+					message3 = getContains.getText() + "@@";
+					code = code + "d";
 				}
 
 				if (!getRefersTo.getText().equals("")) {
-					message = message + "r" + getRefersTo.getText();
+					message4 = getRefersTo.getText();
+					code = code + "r";
 				}
+
+				message = message + code + "@@" + message2 + message3 + message4;
 
 				// send the get message to the server
 				try {
 					PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 					BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out.println(message);
-					output.setText(in.readLine());
+					String temp = in.readLine();
+					if (temp.equals("")) {
+						output.setText("No pins are on the board.");
+					} else {
+						output.setText("");
+						String[] removed = temp.split("@@");
+						for (int i = 0; i < removed.length; i++) {
+							output.append(removed[i] + "\n");
+						}
+					}
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -577,8 +595,8 @@ public class Client extends javax.swing.JFrame {
 	}
 
 	private void postYCoordinateAction(java.awt.event.ActionEvent evt) {
-		// TODO add your handling code here:
-	}// GEN-LAST:event_jTextField5ActionPerformed
+
+	}
 
 	/**
 	 * @param args the command line arguments
@@ -663,7 +681,6 @@ public class Client extends javax.swing.JFrame {
 	private final Action action = new SwingAction();
 	private JTextField textField;
 
-	// End of variables declaration//GEN-END:variables
 	private class SwingAction extends AbstractAction {
 		public SwingAction() {
 			putValue(NAME, "SwingAction");
