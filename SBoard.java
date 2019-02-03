@@ -171,7 +171,6 @@ public class SBoard {
 						// fetch only content
 						else if (parsed[1].equals("c")) {
 							for (int i = 0; i < board.notes.size(); i++) {
-								System.out.println("test");
 								boolean isGood = getColour(parsed[2], board.notes.get(i).colour);
 								if (isGood) {
 									int f = i + 1;
@@ -345,14 +344,28 @@ public class SBoard {
 
 		// updates the notes pin status
 		private void updateUnpin(Pin p, ArrayList<Note> notes) {
+//			int size = notes.size();
+//			for (int i = size - 1; i >= 0; i--) {
+//				if (notes.get(i).points.get(i).x == p.x && notes.get(i).points.get(i).y == p.y) {
+//					notes.get(i).points.remove(i);
+//					// if after removing that pin, if there are no
+//					// pins left then it is not pinned; set to false
+//					if (notes.get(i).points.size() == 0) {
+//						notes.get(i).isPinned = false;
+//					}
+//				}
+//			}
+			
 			int size = notes.size();
-			for (int i = size - 1; i >= 0; i--) {
-				if (notes.get(i).points.get(i).x == p.x && notes.get(i).points.get(i).y == p.y) {
-					notes.get(i).points.remove(i);
-					// if after removing that pin, if there are no
-					// pins left then it is not pinned; set to false
-					if (notes.get(i).points.size() == 0) {
-						notes.get(i).isPinned = false;
+			for (int i = 0; i < size; i++) {
+				for(int j = 0; j < notes.get(i).points.size(); j++) {
+					if (notes.get(i).points.get(j).x == p.x && notes.get(i).points.get(j).y == p.y) {
+						notes.get(i).points.remove(j);
+						// if after removing that pin, if there are no
+						// pins left then it is not pinned; set to false
+						if (notes.get(i).points.size() == 0) {
+							notes.get(i).isPinned = false;
+						}
 					}
 				}
 			}
