@@ -1,10 +1,6 @@
 # CP372_a1
 Creating a basic server where you can post notes.
 
-FEATURES NOT BUGS
-
--once you disconnect you cannot do anything
-
 ERRORS
 
 -check if the client has connected before posting
