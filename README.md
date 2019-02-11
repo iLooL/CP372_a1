@@ -1,4 +1,4 @@
-# CP372_a1
+# Bulletin Board
 Creating a basic server where you can post notes.
 
 ERRORS
